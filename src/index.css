@@ -1,0 +1,187 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-vibe-bg text-vibe-text font-sans antialiased;
+  }
+}
+
+@layer components {
+  /* Glassmorphism Panel */
+  .glass-panel {
+    @apply bg-white/80 backdrop-blur-xl border border-white/60;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  /* Vibe Card - Main card style */
+  .vibe-card {
+    @apply bg-white/90 backdrop-blur-md rounded-3xl border border-white/60;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.06),
+      0 2px 8px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  /* Substitution Block Card */
+  .substitution-block {
+    @apply bg-white rounded-2xl border-2 border-slate-100 p-6;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  }
+
+  .substitution-block:hover {
+    @apply border-vibe-primary/30;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.1);
+  }
+
+  /* Draggable Chip */
+  .draggable-chip {
+    @apply px-4 py-2 rounded-2xl font-bold text-lg cursor-grab select-none;
+    @apply bg-white border-2 border-slate-200 shadow-md;
+    @apply hover:shadow-lg hover:border-vibe-primary/50 hover:scale-105;
+    @apply active:cursor-grabbing active:scale-95;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Premium Button */
+  .btn-vibe {
+    @apply px-6 py-3 rounded-2xl font-semibold text-white;
+    @apply bg-gradient-to-r from-vibe-primary to-blue-600;
+    @apply shadow-lg shadow-blue-500/25;
+    @apply hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5;
+    @apply active:scale-95;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-approve {
+    @apply px-6 py-3 rounded-2xl font-semibold text-white;
+    @apply bg-gradient-to-r from-emerald-500 to-green-600;
+    @apply shadow-lg shadow-emerald-500/25;
+    @apply hover:shadow-xl hover:shadow-emerald-500/30 hover:-translate-y-0.5;
+    @apply active:scale-95;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Math Input Wrapper */
+  .math-input-vibe {
+    @apply bg-white rounded-2xl border-2 border-slate-100 p-4;
+    @apply focus-within:border-vibe-primary focus-within:ring-4 focus-within:ring-vibe-primary/10;
+    transition: all 0.2s ease;
+  }
+
+  .math-input-vibe math-field {
+    font-size: 1.5rem !important;
+    --caret-color: #3B82F6;
+    --selection-background-color: rgba(59, 130, 246, 0.2);
+  }
+}
+
+@layer utilities {
+  /* Dot Grid Background */
+  .dot-grid {
+    background-image: radial-gradient(circle, #CBD5E1 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
+  }
+
+  /* Scroll styling */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-slate-100 rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full hover:bg-slate-400;
+  }
+
+  /* Animation utilities */
+  .animate-bounce-in {
+    animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  }
+
+  @keyframes bounceIn {
+    0% {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .animate-fly-in {
+    animation: flyIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes flyIn {
+    0% {
+      transform: translateX(100px) scale(0.8);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* New Animations for Refined UI */
+  .animate-shake {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  }
+
+  @keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+  }
+
+  .animate-fade-in-down {
+    animation: fadeInDown 0.4s ease-out both;
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translate3d(0, -20px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  .animate-fade-in-left {
+    animation: fadeInLeft 0.4s ease-out both;
+  }
+
+  @keyframes fadeInLeft {
+    from {
+      opacity: 0;
+      transform: translate3d(20px, 0, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+}
+
+/* MathLive custom styling */
+math-field {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+
+math-field::part(content) {
+  padding: 8px 12px;
+}
