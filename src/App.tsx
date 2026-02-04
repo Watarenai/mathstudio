@@ -44,6 +44,7 @@ const DIFFICULTY_CONFIG = {
 };
 
 // チャレンジ用問題リスト生成 (50% Easy, 30% Normal, 20% Hard)
+// グラデーション: Easy → Normal → Hard の順で出題
 const generateChallengeProblems = (count: number): GeneratedProblem[] => {
   const easyCount = Math.round(count * 0.5);
   const normalCount = Math.round(count * 0.3);
@@ -54,12 +55,7 @@ const generateChallengeProblems = (count: number): GeneratedProblem[] => {
   for (let i = 0; i < normalCount; i++) problems.push(getRandomProblemByDifficulty('Normal'));
   for (let i = 0; i < hardCount; i++) problems.push(getRandomProblemByDifficulty('Hard'));
 
-  // シャッフル
-  for (let i = problems.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [problems[i], problems[j]] = [problems[j], problems[i]];
-  }
-
+  // シャッフルなし: Easy → Normal → Hard のグラデーション順
   return problems;
 };
 
@@ -137,6 +133,9 @@ const MathStudioV2 = () => {
     setChallengeComplete(false);
     setChallengeProblems([]);
     setChallengeIndex(0);
+    // スコアと履歴をリセット
+    setScore(0);
+    setHistory([]);
     generateProblem();
   };
 
