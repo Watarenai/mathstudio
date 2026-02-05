@@ -396,8 +396,17 @@ const MathStudioV2 = () => {
                 <div className="mb-4 relative group shrink-0">
                   <input
                     type="text"
-                    readOnly
                     value={userAnswer}
+                    onChange={(e) => {
+                      if (status === 'correct') return;
+                      setUserAnswer(e.target.value);
+                      setStatus('idle');
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && userAnswer && status !== 'correct') {
+                        handleCheck();
+                      }
+                    }}
                     placeholder="y = "
                     className={`w-full p-6 text-3xl font-mono rounded-[24px] border-4 outline-none transition-all shadow-sm ${status === 'correct' ? 'border-emerald-400 bg-emerald-50 text-emerald-700' :
                       status === 'incorrect' ? 'border-rose-300 bg-rose-50 text-rose-700' : 'border-slate-100 bg-white focus:border-sky-400'
