@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lightbulb, RotateCcw, Award, Hash, Delete, Sprout, Sword, Flame, PenTool, Keyboard, Play, Trophy, Crown, Calculator, Shapes } from 'lucide-react';
+import { Lightbulb, RotateCcw, Award, Hash, Delete, Sprout, Sword, Flame, PenTool, Keyboard, Play, Trophy, Crown, Calculator, Shapes, AlertCircle, RefreshCw } from 'lucide-react';
 import { Tldraw } from 'tldraw';
 import 'tldraw/tldraw.css';
 import { GeneratedProblem, getRandomProblemByDifficulty, checkAnswer } from './data/mockProblems';
@@ -11,6 +11,14 @@ interface HistoryItem {
   id: string;
   points: number;
   label: string;
+}
+
+// 間違えた問題の型
+interface WrongAnswerItem {
+  id: string;
+  problem: GeneratedProblem | GeometryProblem;
+  userAnswer: string;
+  timestamp: number;
 }
 
 // 難易度テーマ設定
@@ -95,6 +103,9 @@ const MathStudioV2 = () => {
   const [challengeProblems, setChallengeProblems] = useState<(GeneratedProblem | GeometryProblem)[]>([]);
   const [challengeIndex, setChallengeIndex] = useState(0);
   const [challengeComplete, setChallengeComplete] = useState(false);
+
+  // 間違えた問題の履歴
+  const [wrongAnswers, setWrongAnswers] = useState<WrongAnswerItem[]>([]);
 
   // 初回ロード
   useEffect(() => { generateProblem(); }, []);
@@ -192,6 +203,21 @@ const MathStudioV2 = () => {
       setStatus('incorrect');
       // 間違い1回で -20点
       setCurrentProblemPoints(prev => Math.max(prev - 20, 10));
+
+      // 間違えた問題を履歴に追加（重複チェック）
+      if (currentProblem) {
+        setWrongAnswers(prev => {
+          // 同じ問題がすでにある場合は追加しない
+          const exists = prev.some(item => item.problem.id === currentProblem.id);
+          if (exists) return prev;
+          return [...prev, {
+            id: Date.now().toString(),
+            problem: currentProblem,
+            userAnswer: userAnswer,
+            timestamp: Date.now()
+          }];
+        });
+      }
     }
   };
 
@@ -218,8 +244,8 @@ const MathStudioV2 = () => {
               }}
               disabled={challengeMode}
               className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${genre === 'proportional'
-                  ? 'bg-indigo-500 text-white shadow-lg'
-                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                ? 'bg-indigo-500 text-white shadow-lg'
+                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                 } ${challengeMode ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <Calculator size={16} /> 比例
@@ -232,8 +258,8 @@ const MathStudioV2 = () => {
               }}
               disabled={challengeMode}
               className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${genre === 'geometry'
-                  ? 'bg-teal-500 text-white shadow-lg'
-                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                ? 'bg-teal-500 text-white shadow-lg'
+                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                 } ${challengeMode ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <Shapes size={16} /> 図形
@@ -511,9 +537,9 @@ const MathStudioV2 = () => {
 
         <div className="flex-1 flex flex-col overflow-hidden">
           <h3 className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-6">Mastery History</h3>
-          <div className="space-y-3 overflow-y-auto flex-1 custom-scrollbar pr-2">
+          <div className="space-y-3 overflow-y-auto flex-1 custom-scrollbar pr-2 max-h-40">
             <AnimatePresence>
-              {history.map((h) => (
+              {history.slice(0, 5).map((h) => (
                 <motion.div
                   key={h.id}
                   initial={{ x: 20, opacity: 0 }}
@@ -528,6 +554,52 @@ const MathStudioV2 = () => {
 
             {history.length === 0 && (
               <p className="text-center text-[10px] text-slate-300 font-bold uppercase py-10">Ready for next mission</p>
+            )}
+          </div>
+        </div>
+
+        {/* 間違えた問題セクション */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <h3 className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <AlertCircle size={12} className="text-rose-400" />
+            Review Queue ({wrongAnswers.length})
+          </h3>
+          <div className="space-y-2 overflow-y-auto flex-1 custom-scrollbar pr-2">
+            <AnimatePresence>
+              {wrongAnswers.map((item) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ x: 20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -20, opacity: 0 }}
+                  className="p-3 bg-rose-50 rounded-xl border border-rose-100 text-rose-700"
+                >
+                  <p className="text-xs font-medium line-clamp-2 mb-2">{item.problem.problem.text}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-rose-400">あなたの解答: {item.userAnswer || '(空欄)'}</span>
+                    <button
+                      onClick={() => {
+                        if (challengeMode) return;
+                        setCurrentProblem(item.problem);
+                        setUserAnswer('');
+                        setHintIndex(-1);
+                        setStatus('idle');
+                        setCurrentProblemPoints(100);
+                        // 再チャレンジ後は履歴から削除
+                        setWrongAnswers(prev => prev.filter(w => w.id !== item.id));
+                      }}
+                      disabled={challengeMode}
+                      className="flex items-center gap-1 px-2 py-1 bg-rose-500 text-white rounded-lg text-[10px] font-bold hover:bg-rose-600 transition-all disabled:opacity-50"
+                    >
+                      <RefreshCw size={10} /> 再挑戦
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {wrongAnswers.length === 0 && (
+              <p className="text-center text-[10px] text-slate-300 font-bold uppercase py-6">All clear! 🎉</p>
             )}
           </div>
         </div>
