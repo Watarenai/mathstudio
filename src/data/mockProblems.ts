@@ -720,8 +720,8 @@ export function getRandomProblemByDifficulty(difficulty: 'Easy' | 'Normal' | 'Ha
     return filtered[randomIndex];
 }
 
-// 正解判定関数
-export function checkAnswer(problem: GeneratedProblem, userAnswer: string): boolean {
+// 正解判定関数（両方の問題タイプに対応）
+export function checkAnswer(problem: { problem: Problem }, userAnswer: string): boolean {
     // 正規化: 全角半角統一、空白除去、記号統一
     const normalize = (str: string) => {
         return str

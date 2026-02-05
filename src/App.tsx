@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lightbulb, RotateCcw, Award, Hash, Delete, Sprout, Sword, Flame, PenTool, Keyboard, Play, Trophy, Crown } from 'lucide-react';
+import { Lightbulb, RotateCcw, Award, Hash, Delete, Sprout, Sword, Flame, PenTool, Keyboard, Play, Trophy, Crown, Calculator, Shapes } from 'lucide-react';
 import { Tldraw } from 'tldraw';
 import 'tldraw/tldraw.css';
 import { GeneratedProblem, getRandomProblemByDifficulty, checkAnswer } from './data/mockProblems';
+import { GeometryProblem, getRandomGeometryProblemByDifficulty } from './data/geometryProblems';
 
 // 履歴データの型
 interface HistoryItem {
@@ -72,7 +73,7 @@ const generateChallengeProblems = (count: number): GeneratedProblem[] => {
 
 const MathStudioV2 = () => {
   const [difficulty, setDifficulty] = useState<'Easy' | 'Normal' | 'Hard' | 'Expert'>('Easy');
-  const [currentProblem, setCurrentProblem] = useState<GeneratedProblem | null>(null);
+  const [currentProblem, setCurrentProblem] = useState<GeneratedProblem | GeometryProblem | null>(null);
   const [userAnswer, setUserAnswer] = useState('');
   const [hintIndex, setHintIndex] = useState(-1);
   const [status, setStatus] = useState<'idle' | 'correct' | 'incorrect'>('idle');
@@ -82,13 +83,16 @@ const MathStudioV2 = () => {
   // 問題ごとの獲得可能ポイント（100点スタート、ヒント・間違いで減点）
   const [currentProblemPoints, setCurrentProblemPoints] = useState(100);
 
+  // ジャンル選択 (比例・反比例 / 図形)
+  const [genre, setGenre] = useState<'proportional' | 'geometry'>('proportional');
+
   // モード (入力 vs 手書き)
   const [workspaceMode, setWorkspaceMode] = useState<'input' | 'drawing'>('input');
 
   // チャレンジモード
   const [challengeMode, setChallengeMode] = useState(false);
   const [problemCountInput, setProblemCountInput] = useState(10);
-  const [challengeProblems, setChallengeProblems] = useState<GeneratedProblem[]>([]);
+  const [challengeProblems, setChallengeProblems] = useState<(GeneratedProblem | GeometryProblem)[]>([]);
   const [challengeIndex, setChallengeIndex] = useState(0);
   const [challengeComplete, setChallengeComplete] = useState(false);
 
@@ -123,7 +127,9 @@ const MathStudioV2 = () => {
   }, [status, challengeMode, challengeIndex, challengeProblems]);
 
   const generateProblem = (level: 'Easy' | 'Normal' | 'Hard' | 'Expert' = difficulty) => {
-    const randomProblem = getRandomProblemByDifficulty(level);
+    const randomProblem = genre === 'proportional'
+      ? getRandomProblemByDifficulty(level)
+      : getRandomGeometryProblemByDifficulty(level);
     setCurrentProblem(randomProblem);
     setUserAnswer('');
     setHintIndex(-1);
@@ -200,6 +206,41 @@ const MathStudioV2 = () => {
 
       {/* 左：クエスト選択 */}
       <aside className="w-72 flex-shrink-0 bg-white border-r border-slate-200 p-8 flex flex-col gap-6 shadow-[4px_0_24px_rgba(0,0,0,0,0.02)] z-10 overflow-y-auto custom-scrollbar">
+        {/* ジャンル選択タブ */}
+        <div>
+          <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Genre</h2>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                if (challengeMode) return;
+                setGenre('proportional');
+                generateProblem();
+              }}
+              disabled={challengeMode}
+              className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${genre === 'proportional'
+                  ? 'bg-indigo-500 text-white shadow-lg'
+                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                } ${challengeMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <Calculator size={16} /> 比例
+            </button>
+            <button
+              onClick={() => {
+                if (challengeMode) return;
+                setGenre('geometry');
+                generateProblem();
+              }}
+              disabled={challengeMode}
+              className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${genre === 'geometry'
+                  ? 'bg-teal-500 text-white shadow-lg'
+                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                } ${challengeMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <Shapes size={16} /> 図形
+            </button>
+          </div>
+        </div>
+
         <div>
           <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Quest Level</h2>
           <div className="space-y-3">
