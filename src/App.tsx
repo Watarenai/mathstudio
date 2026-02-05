@@ -79,6 +79,9 @@ const MathStudioV2 = () => {
   const [score, setScore] = useState(0);
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
+  // 問題ごとの獲得可能ポイント（100点スタート、ヒント・間違いで減点）
+  const [currentProblemPoints, setCurrentProblemPoints] = useState(100);
+
   // モード (入力 vs 手書き)
   const [workspaceMode, setWorkspaceMode] = useState<'input' | 'drawing'>('input');
 
@@ -105,6 +108,8 @@ const MathStudioV2 = () => {
             setHintIndex(-1);
             setStatus('idle');
             setWorkspaceMode('input');
+            // 次の問題は100点からスタート
+            setCurrentProblemPoints(100);
           } else {
             // チャレンジ完了
             setChallengeComplete(true);
@@ -124,6 +129,8 @@ const MathStudioV2 = () => {
     setHintIndex(-1);
     setStatus('idle');
     setWorkspaceMode('input');
+    // 新しい問題では100点からスタート
+    setCurrentProblemPoints(100);
   };
 
   const startChallenge = () => {
@@ -137,6 +144,8 @@ const MathStudioV2 = () => {
     setHintIndex(-1);
     setStatus('idle');
     setWorkspaceMode('input');
+    // 最初の問題は100点からスタート
+    setCurrentProblemPoints(100);
   };
 
   const exitChallenge = () => {
@@ -168,13 +177,15 @@ const MathStudioV2 = () => {
     const isCorrect = checkAnswer(currentProblem, userAnswer);
     if (isCorrect) {
       setStatus('correct');
-      const deduction = hintIndex === -1 ? 0 : Math.min(hintIndex + 1, 2) * 50;
-      const finalPoints = Math.max(currentProblem.meta.points - deduction, currentProblem.meta.points / 2);
+      // 現在の獲得可能ポイント（100点スタート、減点済み）を加算
+      const finalPoints = Math.max(currentProblemPoints, 10);
 
       setScore(prev => prev + finalPoints);
       setHistory(prev => [{ id: Date.now().toString(), points: finalPoints, label: challengeMode ? `${challengeIndex + 1}/${challengeProblems.length}` : 'QUEST COMPLETE!' }, ...prev]);
     } else {
       setStatus('incorrect');
+      // 間違い1回で -20点
+      setCurrentProblemPoints(prev => Math.max(prev - 20, 10));
     }
   };
 
@@ -320,8 +331,9 @@ const MathStudioV2 = () => {
               <span className={`text-xs font-black text-${currentTheme.color}-500 uppercase tracking-widest bg-${currentTheme.color}-50 px-3 py-1 rounded-lg`}>
                 Mission
               </span>
-              <div className="flex items-center gap-2 text-slate-300 font-bold">
-                <Hash size={14} /> {currentProblem.meta.points} pts
+              <div className={`flex items-center gap-2 font-bold ${currentProblemPoints < 100 ? 'text-rose-400' : 'text-slate-300'}`}>
+                <Hash size={14} /> {currentProblemPoints} pts
+                {currentProblemPoints < 100 && <span className="text-xs">(-{100 - currentProblemPoints})</span>}
               </div>
             </div>
             <p className="text-xl font-bold leading-relaxed text-slate-800 mb-6">
@@ -345,10 +357,14 @@ const MathStudioV2 = () => {
 
               {hintIndex < currentProblem.hints.length - 1 && (
                 <button
-                  onClick={() => setHintIndex(prev => Math.min(prev + 1, currentProblem.hints.length - 1))}
+                  onClick={() => {
+                    setHintIndex(prev => Math.min(prev + 1, currentProblem.hints.length - 1));
+                    // ヒント1つで -15点
+                    setCurrentProblemPoints(prev => Math.max(prev - 15, 10));
+                  }}
                   className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-400 text-xs font-bold hover:bg-amber-50 hover:text-amber-600 transition-all"
                 >
-                  <Lightbulb size={14} /> {hintIndex === -1 ? 'ヒント' : '次のヒント'}
+                  <Lightbulb size={14} /> {hintIndex === -1 ? 'ヒント' : '次のヒント'} <span className="text-rose-400">(-15pt)</span>
                 </button>
               )}
             </div>
