@@ -2,7 +2,7 @@
 // ヒント配列と正解判定用データを含む
 
 export interface ProblemMeta {
-    difficulty: 'Easy' | 'Normal' | 'Hard';
+    difficulty: 'Easy' | 'Normal' | 'Hard' | 'Expert';
     points: number;
     unit: '比例' | '反比例';
 }
@@ -587,18 +587,134 @@ export const allProblems: GeneratedProblem[] = [
     inverse_hard_04,
 ];
 
-// 難易度別にフィルタリング
-export const getProblemsByDifficulty = (difficulty: 'Easy' | 'Normal' | 'Hard') =>
-    allProblems.filter(p => p.meta.difficulty === difficulty);
+// ============================================
+// Expert (400pt) - 応用文章題
+// ============================================
+
+const expert_01: GeneratedProblem = {
+    id: 'expert-01',
+    meta: { difficulty: 'Expert', points: 400, unit: '比例' },
+    problem: {
+        text: '兄と弟が同時に家を出発し、同じ道を歩きます。兄は毎分 80m、弟は毎分 60m で歩きます。出発してから x 分後の兄と弟の距離の差を y m とするとき、y を x の式で表しなさい。',
+        correct_answer: 'y=20x',
+        answer_variants: ['y = 20x', 'y=20*x'],
+    },
+    hints: [
+        '兄が x 分間に歩く距離は 80x m です。',
+        '弟が x 分間に歩く距離は 60x m です。',
+        '距離の差 = 80x - 60x = 20x',
+    ],
+    chips: ['20', '60', '80', 'x', 'y', '=', '×', '-'],
+};
+
+const expert_02: GeneratedProblem = {
+    id: 'expert-02',
+    meta: { difficulty: 'Expert', points: 400, unit: '反比例' },
+    problem: {
+        text: 'ある仕事を完成させるのに、4人で働くと15日かかります。同じ仕事を6人で働くと何日かかりますか。',
+        correct_answer: '10',
+        answer_variants: ['10日', '10 日'],
+    },
+    hints: [
+        '仕事量 = 人数 × 日数 で一定です。',
+        '4人 × 15日 = 60（仕事量）',
+        '6人 × y日 = 60 より y = 10',
+    ],
+    chips: ['4', '6', '10', '15', '60', 'x', 'y', '=', '×', '÷'],
+};
+
+const expert_03: GeneratedProblem = {
+    id: 'expert-03',
+    meta: { difficulty: 'Expert', points: 400, unit: '比例' },
+    problem: {
+        text: '水槽に毎分 5L ずつ水を入れます。最初に 20L の水が入っていたとき、x 分後の水の量を y L とすると、y を x の式で表しなさい。',
+        correct_answer: 'y=5x+20',
+        answer_variants: ['y = 5x + 20', 'y=5x+20', 'y = 5x+20'],
+    },
+    hints: [
+        'x 分間で入る水の量は 5x L です。',
+        '最初から 20L 入っているので、y = 最初の量 + 増えた量',
+        'y = 20 + 5x = 5x + 20',
+    ],
+    chips: ['5', '20', 'x', 'y', '=', '+', '×'],
+};
+
+const expert_04: GeneratedProblem = {
+    id: 'expert-04',
+    meta: { difficulty: 'Expert', points: 400, unit: '反比例' },
+    problem: {
+        text: '時速 60km で走ると 2時間かかる道のりがあります。時速 80km で走ると何時間かかりますか。',
+        correct_answer: '1.5',
+        answer_variants: ['1.5時間', '1.5 時間', '3/2', '1時間30分'],
+    },
+    hints: [
+        '道のり = 速さ × 時間 で一定です。',
+        '道のり = 60 × 2 = 120km',
+        '80 × y = 120 より y = 1.5',
+    ],
+    chips: ['2', '60', '80', '120', '1.5', 'x', 'y', '=', '×', '÷'],
+};
+
+const expert_05: GeneratedProblem = {
+    id: 'expert-05',
+    meta: { difficulty: 'Expert', points: 400, unit: '比例' },
+    problem: {
+        text: 'A町からB町まで 180km あります。車が時速 x km で走るときにかかる時間を y 時間とするとき、y を x の式で表しなさい。また、時速 45km で走るとき何時間かかりますか。',
+        correct_answer: '4',
+        answer_variants: ['4時間', '4 時間', 'y=180/x,4'],
+    },
+    hints: [
+        '時間 = 道のり ÷ 速さ なので y = 180/x',
+        'x = 45 を代入すると y = 180 ÷ 45',
+        'y = 4 時間',
+    ],
+    chips: ['4', '45', '180', 'x', 'y', '=', '÷'],
+};
+
+const expert_06: GeneratedProblem = {
+    id: 'expert-06',
+    meta: { difficulty: 'Expert', points: 400, unit: '反比例' },
+    problem: {
+        text: '長さ 240cm のテープを x 人で等しく分けると、1人あたり y cm になります。8人で分けると1人何cm になりますか。',
+        correct_answer: '30',
+        answer_variants: ['30cm', '30 cm'],
+    },
+    hints: [
+        'y = 240/x（反比例の関係）',
+        'x = 8 を代入します',
+        'y = 240 ÷ 8 = 30cm',
+    ],
+    chips: ['8', '30', '240', 'x', 'y', '=', '÷'],
+};
+
+// Expert問題をallProblemsに追加
+export const expertProblems: GeneratedProblem[] = [
+    expert_01,
+    expert_02,
+    expert_03,
+    expert_04,
+    expert_05,
+    expert_06,
+];
+
+// すべての問題（Expert含む）
+export const allProblemsWithExpert: GeneratedProblem[] = [
+    ...allProblems,
+    ...expertProblems,
+];
+
+// 難易度別にフィルタリング（Expert対応）
+export const getProblemsByDifficulty = (difficulty: 'Easy' | 'Normal' | 'Hard' | 'Expert') =>
+    allProblemsWithExpert.filter(p => p.meta.difficulty === difficulty);
 
 // ランダムに1問取得
 export function getRandomProblem(): GeneratedProblem {
-    const randomIndex = Math.floor(Math.random() * allProblems.length);
-    return allProblems[randomIndex];
+    const randomIndex = Math.floor(Math.random() * allProblemsWithExpert.length);
+    return allProblemsWithExpert[randomIndex];
 }
 
-// 難易度を指定してランダムに1問取得
-export function getRandomProblemByDifficulty(difficulty: 'Easy' | 'Normal' | 'Hard'): GeneratedProblem {
+// 難易度を指定してランダムに1問取得（Expert対応）
+export function getRandomProblemByDifficulty(difficulty: 'Easy' | 'Normal' | 'Hard' | 'Expert'): GeneratedProblem {
     const filtered = getProblemsByDifficulty(difficulty);
     const randomIndex = Math.floor(Math.random() * filtered.length);
     return filtered[randomIndex];

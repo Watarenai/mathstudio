@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lightbulb, RotateCcw, Award, Hash, Delete, Sprout, Sword, Flame, PenTool, Keyboard, Play, Trophy } from 'lucide-react';
+import { Lightbulb, RotateCcw, Award, Hash, Delete, Sprout, Sword, Flame, PenTool, Keyboard, Play, Trophy, Crown } from 'lucide-react';
 import { Tldraw } from 'tldraw';
 import 'tldraw/tldraw.css';
 import { GeneratedProblem, getRandomProblemByDifficulty, checkAnswer } from './data/mockProblems';
@@ -40,27 +40,38 @@ const DIFFICULTY_CONFIG = {
     textColor: 'text-rose-600',
     icon: Flame,
     shadowConfig: 'shadow-rose-200'
+  },
+  Expert: {
+    color: 'violet',
+    bgColor: 'bg-violet-50',
+    activeBg: 'bg-violet-500',
+    borderColor: 'border-violet-200',
+    textColor: 'text-violet-600',
+    icon: Crown,
+    shadowConfig: 'shadow-violet-200'
   }
 };
 
-// チャレンジ用問題リスト生成 (50% Easy, 30% Normal, 20% Hard)
-// グラデーション: Easy → Normal → Hard の順で出題
+// チャレンジ用問題リスト生成 (40% Easy, 30% Normal, 20% Hard, 10% Expert)
+// グラデーション: Easy → Normal → Hard → Expert の順で出題
 const generateChallengeProblems = (count: number): GeneratedProblem[] => {
-  const easyCount = Math.round(count * 0.5);
+  const easyCount = Math.round(count * 0.4);
   const normalCount = Math.round(count * 0.3);
-  const hardCount = count - easyCount - normalCount;
+  const hardCount = Math.round(count * 0.2);
+  const expertCount = count - easyCount - normalCount - hardCount;
 
   const problems: GeneratedProblem[] = [];
   for (let i = 0; i < easyCount; i++) problems.push(getRandomProblemByDifficulty('Easy'));
   for (let i = 0; i < normalCount; i++) problems.push(getRandomProblemByDifficulty('Normal'));
   for (let i = 0; i < hardCount; i++) problems.push(getRandomProblemByDifficulty('Hard'));
+  for (let i = 0; i < expertCount; i++) problems.push(getRandomProblemByDifficulty('Expert'));
 
-  // シャッフルなし: Easy → Normal → Hard のグラデーション順
+  // シャッフルなし: Easy → Normal → Hard → Expert のグラデーション順
   return problems;
 };
 
 const MathStudioV2 = () => {
-  const [difficulty, setDifficulty] = useState<'Easy' | 'Normal' | 'Hard'>('Easy');
+  const [difficulty, setDifficulty] = useState<'Easy' | 'Normal' | 'Hard' | 'Expert'>('Easy');
   const [currentProblem, setCurrentProblem] = useState<GeneratedProblem | null>(null);
   const [userAnswer, setUserAnswer] = useState('');
   const [hintIndex, setHintIndex] = useState(-1);
@@ -106,7 +117,7 @@ const MathStudioV2 = () => {
     }
   }, [status, challengeMode, challengeIndex, challengeProblems]);
 
-  const generateProblem = (level: 'Easy' | 'Normal' | 'Hard' = difficulty) => {
+  const generateProblem = (level: 'Easy' | 'Normal' | 'Hard' | 'Expert' = difficulty) => {
     const randomProblem = getRandomProblemByDifficulty(level);
     setCurrentProblem(randomProblem);
     setUserAnswer('');
@@ -181,7 +192,7 @@ const MathStudioV2 = () => {
         <div>
           <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Quest Level</h2>
           <div className="space-y-3">
-            {(Object.keys(DIFFICULTY_CONFIG) as Array<'Easy' | 'Normal' | 'Hard'>).map((lvl) => {
+            {(Object.keys(DIFFICULTY_CONFIG) as Array<'Easy' | 'Normal' | 'Hard' | 'Expert'>).map((lvl) => {
               const theme = DIFFICULTY_CONFIG[lvl];
               const Icon = theme.icon;
               const isActive = !challengeMode && difficulty === lvl;
