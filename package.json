@@ -1,13 +1,52 @@
 {
-  "name": "mathbudy",
+  "name": "mathstudio",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "MathStudio - Interactive Math Learning App",
+  "author": "MathStudio Team",
+  "main": "electron/main.js",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
+    "electron:build": "npm run build && electron-builder",
+    "electron:preview": "npm run build && electron ."
+  },
+  "build": {
+    "appId": "com.mathstudio.app",
+    "productName": "MathStudio",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "public/icon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "public/icon.icns"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "public/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   },
   "dependencies": {
     "framer-motion": "^12.29.3",
@@ -25,12 +64,17 @@
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.16",
+    "concurrently": "^9.2.1",
+    "cross-env": "^7.0.3",
+    "electron": "^40.1.0",
+    "electron-builder": "^26.7.0",
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.2.2",
-    "vite": "^5.0.8"
+    "vite": "^5.0.8",
+    "wait-on": "^9.0.3"
   }
 }

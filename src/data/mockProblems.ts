@@ -70,6 +70,51 @@ const proportional_easy_03: GeneratedProblem = {
     chips: ['3', '5', '15', 'x', 'y', '=', '×'],
 };
 
+const proportional_easy_04: GeneratedProblem = {
+    id: 'prop-easy-04',
+    meta: { difficulty: 'Easy', points: 100, unit: '比例' },
+    problem: {
+        text: 'y = 4x のとき、x = 6 ならば y はいくつですか。',
+        correct_answer: '24',
+        answer_variants: ['y=24', 'y = 24'],
+    },
+    hints: [
+        'x = 6 を式に代入します。',
+        'y = 4 × 6 を計算しましょう。',
+    ],
+    chips: ['4', '6', '24', 'x', 'y', '=', '×'],
+};
+
+const proportional_easy_05: GeneratedProblem = {
+    id: 'prop-easy-05',
+    meta: { difficulty: 'Easy', points: 100, unit: '比例' },
+    problem: {
+        text: 'y = 7x で y = 21 のとき、x の値を求めなさい。',
+        correct_answer: '3',
+        answer_variants: ['x=3', 'x = 3'],
+    },
+    hints: [
+        'y = 7x に y = 21 を代入します。',
+        '21 = 7x なので、x = 21 ÷ 7',
+    ],
+    chips: ['3', '7', '21', 'x', 'y', '=', '÷'],
+};
+
+const proportional_easy_06: GeneratedProblem = {
+    id: 'prop-easy-06',
+    meta: { difficulty: 'Easy', points: 100, unit: '比例' },
+    problem: {
+        text: 'y = 6x のとき、x = 5 ならば y はいくつですか。',
+        correct_answer: '30',
+        answer_variants: ['y=30', 'y = 30'],
+    },
+    hints: [
+        'x = 5 を式に代入します。',
+        'y = 6 × 5 を計算しましょう。',
+    ],
+    chips: ['5', '6', '30', 'x', 'y', '=', '×'],
+};
+
 // ============================================
 // 比例 - Normal (200pt)
 // ============================================
@@ -137,6 +182,37 @@ const proportional_normal_04: GeneratedProblem = {
     chips: ['4', '5', '20', 'a', 'x', 'y', '=', '×'],
 };
 
+const proportional_normal_05: GeneratedProblem = {
+    id: 'prop-normal-05',
+    meta: { difficulty: 'Normal', points: 200, unit: '比例' },
+    problem: {
+        text: '水槽に毎分 3L ずつ水を入れます。x 分後の水の量を y L とするとき、y を x の式で表しなさい。',
+        correct_answer: 'y=3x',
+        answer_variants: ['y = 3x', 'y=3*x'],
+    },
+    hints: [
+        '1分で 3L 入るなら、x分では？',
+        '時間 × 速さ = 量 の関係です。',
+    ],
+    chips: ['3', 'x', 'y', '=', '×', 'L', '分'],
+};
+
+const proportional_normal_06: GeneratedProblem = {
+    id: 'prop-normal-06',
+    meta: { difficulty: 'Normal', points: 200, unit: '比例' },
+    problem: {
+        text: 'y は x に比例し、x = 3 のとき y = 15 です。x = 7 のとき y の値を求めなさい。',
+        correct_answer: '35',
+        answer_variants: ['y=35', 'y = 35'],
+    },
+    hints: [
+        'まず比例定数を求めます。15 = a × 3 から a = 5',
+        'y = 5x に x = 7 を代入します。',
+        'y = 5 × 7 = 35',
+    ],
+    chips: ['3', '5', '7', '15', '35', 'x', 'y', '=', '×'],
+};
+
 // ============================================
 // 比例 - Hard (300pt)
 // ============================================
@@ -171,6 +247,38 @@ const proportional_hard_02: GeneratedProblem = {
         '比例定数が正なので、x が増えると y も増えます。',
     ],
     chips: ['1', '2', '5', '10', 'x', 'y', '≦', '='],
+};
+
+const proportional_hard_03: GeneratedProblem = {
+    id: 'prop-hard-03',
+    meta: { difficulty: 'Hard', points: 300, unit: '比例' },
+    problem: {
+        text: 'グラフが点 (-2, 8) を通る比例の式を求めなさい。',
+        correct_answer: 'y=-4x',
+        answer_variants: ['y = -4x', 'y=-4*x'],
+    },
+    hints: [
+        '比例は y = ax の形です。点を代入します。',
+        '8 = a × (-2) より a = 8 ÷ (-2) = -4',
+        'よって y = -4x',
+    ],
+    chips: ['-4', '-2', '8', 'a', 'x', 'y', '=', '×', '÷'],
+};
+
+const proportional_hard_04: GeneratedProblem = {
+    id: 'prop-hard-04',
+    meta: { difficulty: 'Hard', points: 300, unit: '比例' },
+    problem: {
+        text: 'y = -3x で、x の変域が -2 ≦ x ≦ 4 のとき、y の変域を求めなさい。',
+        correct_answer: '-12≦y≦6',
+        answer_variants: ['-12 ≦ y ≦ 6', '-12<=y<=6'],
+    },
+    hints: [
+        'x = -2 のとき y = -3 × (-2) = 6',
+        'x = 4 のとき y = -3 × 4 = -12',
+        '比例定数が負なので、x が増えると y は減ります。',
+    ],
+    chips: ['-12', '-3', '-2', '4', '6', 'x', 'y', '≦', '='],
 };
 
 // ============================================
@@ -221,6 +329,51 @@ const inverse_easy_03: GeneratedProblem = {
         'y = 18 ÷ 6 を計算します。',
     ],
     chips: ['3', '6', '18', 'x', 'y', '=', '÷'],
+};
+
+const inverse_easy_04: GeneratedProblem = {
+    id: 'inv-easy-04',
+    meta: { difficulty: 'Easy', points: 100, unit: '反比例' },
+    problem: {
+        text: 'y = 24/x のとき、x = 8 ならば y はいくつですか。',
+        correct_answer: '3',
+        answer_variants: ['y=3', 'y = 3'],
+    },
+    hints: [
+        'x = 8 を式に代入します。',
+        'y = 24 ÷ 8 を計算します。',
+    ],
+    chips: ['3', '8', '24', 'x', 'y', '=', '÷'],
+};
+
+const inverse_easy_05: GeneratedProblem = {
+    id: 'inv-easy-05',
+    meta: { difficulty: 'Easy', points: 100, unit: '反比例' },
+    problem: {
+        text: 'y = 30/x で y = 6 のとき、x の値を求めなさい。',
+        correct_answer: '5',
+        answer_variants: ['x=5', 'x = 5'],
+    },
+    hints: [
+        '6 = 30/x という式になります。',
+        'x = 30 ÷ 6 = 5',
+    ],
+    chips: ['5', '6', '30', 'x', 'y', '=', '÷'],
+};
+
+const inverse_easy_06: GeneratedProblem = {
+    id: 'inv-easy-06',
+    meta: { difficulty: 'Easy', points: 100, unit: '反比例' },
+    problem: {
+        text: 'y = 16/x のとき、x = 4 ならば y はいくつですか。',
+        correct_answer: '4',
+        answer_variants: ['y=4', 'y = 4'],
+    },
+    hints: [
+        'x = 4 を式に代入します。',
+        'y = 16 ÷ 4 を計算します。',
+    ],
+    chips: ['4', '16', 'x', 'y', '=', '÷'],
 };
 
 // ============================================
@@ -275,6 +428,52 @@ const inverse_normal_03: GeneratedProblem = {
     chips: ['1200', 'x', 'y', '=', '÷', 'm', '分'],
 };
 
+const inverse_normal_04: GeneratedProblem = {
+    id: 'inv-normal-04',
+    meta: { difficulty: 'Normal', points: 200, unit: '反比例' },
+    problem: {
+        text: 'y は x に反比例し、x = 5 のとき y = 8 です。y を x の式で表しなさい。',
+        correct_answer: 'y=40/x',
+        answer_variants: ['y = 40/x', 'y=40÷x'],
+    },
+    hints: [
+        'xy = a なので、5 × 8 = 40',
+        'よって y = 40/x',
+    ],
+    chips: ['5', '8', '40', 'x', 'y', '=', '×', '÷'],
+};
+
+const inverse_normal_05: GeneratedProblem = {
+    id: 'inv-normal-05',
+    meta: { difficulty: 'Normal', points: 200, unit: '反比例' },
+    problem: {
+        text: '60個のあめを x 人で等しく分けると、1人あたり y 個もらえます。y を x の式で表しなさい。',
+        correct_answer: 'y=60/x',
+        answer_variants: ['y = 60/x', 'y=60÷x'],
+    },
+    hints: [
+        '全体 ÷ 人数 = 1人あたりの個数',
+        'y = 60 ÷ x',
+    ],
+    chips: ['60', 'x', 'y', '=', '÷', '個', '人'],
+};
+
+const inverse_normal_06: GeneratedProblem = {
+    id: 'inv-normal-06',
+    meta: { difficulty: 'Normal', points: 200, unit: '反比例' },
+    problem: {
+        text: 'y は x に反比例し、x = 3 のとき y = 12 です。x = 9 のとき y の値を求めなさい。',
+        correct_answer: '4',
+        answer_variants: ['y=4', 'y = 4'],
+    },
+    hints: [
+        'まず xy = a を求めます。3 × 12 = 36',
+        'x = 9 のとき、9 × y = 36',
+        'y = 36 ÷ 9 = 4',
+    ],
+    chips: ['3', '4', '9', '12', '36', 'x', 'y', '=', '×', '÷'],
+};
+
 // ============================================
 // 反比例 - Hard (300pt)
 // ============================================
@@ -311,34 +510,81 @@ const inverse_hard_02: GeneratedProblem = {
     chips: ['2', '4', '6', '12', '24', 'x', 'y', '≦', '='],
 };
 
+const inverse_hard_03: GeneratedProblem = {
+    id: 'inv-hard-03',
+    meta: { difficulty: 'Hard', points: 300, unit: '反比例' },
+    problem: {
+        text: 'グラフが点 (5, -6) を通る反比例の式を求めなさい。',
+        correct_answer: 'y=-30/x',
+        answer_variants: ['y = -30/x', 'y=-30÷x'],
+    },
+    hints: [
+        '反比例は y = a/x の形です。',
+        '5 × (-6) = -30',
+        'よって y = -30/x',
+    ],
+    chips: ['-30', '-6', '5', 'a', 'x', 'y', '=', '×', '÷'],
+};
+
+const inverse_hard_04: GeneratedProblem = {
+    id: 'inv-hard-04',
+    meta: { difficulty: 'Hard', points: 300, unit: '反比例' },
+    problem: {
+        text: 'y = 48/x で、x の変域が 4 ≦ x ≦ 12 のとき、y の変域を求めなさい。',
+        correct_answer: '4≦y≦12',
+        answer_variants: ['4 ≦ y ≦ 12', '4<=y<=12'],
+    },
+    hints: [
+        'x = 4 のとき y = 48 ÷ 4 = 12',
+        'x = 12 のとき y = 48 ÷ 12 = 4',
+        '反比例では x が増えると y は減ります。',
+    ],
+    chips: ['4', '12', '48', 'x', 'y', '≦', '=', '÷'],
+};
+
 // ============================================
 // エクスポート
 // ============================================
 
 export const allProblems: GeneratedProblem[] = [
-    // 比例 Easy
+    // 比例 Easy (6問)
     proportional_easy_01,
     proportional_easy_02,
     proportional_easy_03,
-    // 比例 Normal
+    proportional_easy_04,
+    proportional_easy_05,
+    proportional_easy_06,
+    // 比例 Normal (6問)
     proportional_normal_01,
     proportional_normal_02,
     proportional_normal_03,
     proportional_normal_04,
-    // 比例 Hard
+    proportional_normal_05,
+    proportional_normal_06,
+    // 比例 Hard (4問)
     proportional_hard_01,
     proportional_hard_02,
-    // 反比例 Easy
+    proportional_hard_03,
+    proportional_hard_04,
+    // 反比例 Easy (6問)
     inverse_easy_01,
     inverse_easy_02,
     inverse_easy_03,
-    // 反比例 Normal
+    inverse_easy_04,
+    inverse_easy_05,
+    inverse_easy_06,
+    // 反比例 Normal (6問)
     inverse_normal_01,
     inverse_normal_02,
     inverse_normal_03,
-    // 反比例 Hard
+    inverse_normal_04,
+    inverse_normal_05,
+    inverse_normal_06,
+    // 反比例 Hard (4問)
     inverse_hard_01,
     inverse_hard_02,
+    inverse_hard_03,
+    inverse_hard_04,
 ];
 
 // 難易度別にフィルタリング
