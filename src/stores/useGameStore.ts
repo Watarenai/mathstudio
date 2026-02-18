@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { GeneratedProblem, getRandomProblemByDifficulty, checkAnswer } from '../data/mockProblems';
-import { GeometryProblem, getRandomGeometryProblemByDifficulty } from '../data/geometryProblems';
+import { GeneratedProblem, getRandomProblemByDifficulty, checkAnswer, generateInverseProportion, generateLinearEquation } from '../data/mockProblems';
+import { GeometryProblem, getRandomGeometryProblemByDifficulty, generateSectorProblem } from '../data/geometryProblems';
 
 // 履歴データの型
 export interface HistoryItem {
@@ -19,9 +19,27 @@ export interface WrongAnswerItem {
 }
 
 export type Difficulty = 'Easy' | 'Normal' | 'Hard' | 'Expert';
-export type Genre = 'proportional' | 'geometry';
+export type Genre = 'proportional' | 'geometry' | 'inverse' | 'equation' | 'sector';
 export type WorkspaceMode = 'input' | 'drawing';
 export type AnswerStatus = 'idle' | 'correct' | 'incorrect';
+
+// ジャンル別の問題取得
+function getProblemByGenre(genre: Genre, difficulty: Difficulty): GeneratedProblem | GeometryProblem {
+    switch (genre) {
+        case 'proportional':
+            return getRandomProblemByDifficulty(difficulty);
+        case 'geometry':
+            return getRandomGeometryProblemByDifficulty(difficulty);
+        case 'inverse':
+            return generateInverseProportion(difficulty);
+        case 'equation':
+            return generateLinearEquation(difficulty);
+        case 'sector':
+            return generateSectorProblem(difficulty);
+        default:
+            return getRandomProblemByDifficulty(difficulty);
+    }
+}
 
 // チャレンジ用問題リスト生成
 function generateChallengeProblems(count: number, genre: Genre): (GeneratedProblem | GeometryProblem)[] {
@@ -36,10 +54,7 @@ function generateChallengeProblems(count: number, genre: Genre): (GeneratedProbl
     for (const { level, ratio } of distribution) {
         const num = Math.max(1, Math.round(count * ratio));
         for (let i = 0; i < num && problems.length < count; i++) {
-            const p = genre === 'proportional'
-                ? getRandomProblemByDifficulty(level)
-                : getRandomGeometryProblemByDifficulty(level);
-            problems.push(p);
+            problems.push(getProblemByGenre(genre, level));
         }
     }
     return problems.slice(0, count);
@@ -120,11 +135,9 @@ export const useGameStore = create<GameState>()(
                 const { difficulty, genre } = get();
                 const lvl = level ?? difficulty;
                 const g = selectedGenre ?? genre;
-                const randomProblem = g === 'proportional'
-                    ? getRandomProblemByDifficulty(lvl)
-                    : getRandomGeometryProblemByDifficulty(lvl);
+                const problem = getProblemByGenre(g, lvl);
                 set({
-                    currentProblem: randomProblem,
+                    currentProblem: problem,
                     userAnswer: '',
                     hintIndex: -1,
                     status: 'idle',
@@ -247,7 +260,6 @@ export const useGameStore = create<GameState>()(
         }),
         {
             name: 'mathstudio-progress',
-            // スコア・履歴・間違い・設定のみ永続化（一時的なUI状態は除外）
             partialize: (state) => ({
                 score: state.score,
                 history: state.history,

@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Calculator, Shapes, Sprout, Sword, Flame, Crown, RotateCcw, Play } from 'lucide-react';
-import { useGameStore, Difficulty } from '../stores/useGameStore';
+import { Calculator, Shapes, Sprout, Sword, Flame, Crown, RotateCcw, Play, ArrowDownUp, Variable, Circle } from 'lucide-react';
+import { useGameStore, Difficulty, Genre } from '../stores/useGameStore';
 
 const DIFFICULTY_CONFIG: Record<Difficulty, { color: string; bgColor: string; activeBg: string; textColor: string; icon: any; shadowConfig: string }> = {
     Easy: { color: 'emerald', bgColor: 'bg-emerald-50', activeBg: 'bg-emerald-500', textColor: 'text-emerald-600', icon: Sprout, shadowConfig: 'shadow-emerald-200' },
@@ -11,6 +11,21 @@ const DIFFICULTY_CONFIG: Record<Difficulty, { color: string; bgColor: string; ac
 };
 
 export { DIFFICULTY_CONFIG };
+
+interface GenreConfig {
+    key: Genre;
+    label: string;
+    icon: any;
+    activeClass: string;
+}
+
+const GENRE_TABS: GenreConfig[] = [
+    { key: 'proportional', label: '比例', icon: Calculator, activeClass: 'bg-indigo-500 text-white shadow-lg shadow-indigo-200' },
+    { key: 'inverse', label: '反比例', icon: ArrowDownUp, activeClass: 'bg-purple-500 text-white shadow-lg shadow-purple-200' },
+    { key: 'equation', label: '方程式', icon: Variable, activeClass: 'bg-rose-500 text-white shadow-lg shadow-rose-200' },
+    { key: 'geometry', label: '図形', icon: Shapes, activeClass: 'bg-teal-500 text-white shadow-lg shadow-teal-200' },
+    { key: 'sector', label: 'おうぎ形', icon: Circle, activeClass: 'bg-cyan-500 text-white shadow-lg shadow-cyan-200' },
+];
 
 const LeftSidebar: React.FC = () => {
     const {
@@ -25,21 +40,22 @@ const LeftSidebar: React.FC = () => {
             {/* Genre tabs */}
             <div>
                 <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Genre</h2>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => { if (challengeMode) return; setGenre('proportional'); generateProblem(difficulty, 'proportional'); }}
-                        disabled={challengeMode}
-                        className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${genre === 'proportional' ? 'bg-indigo-500 text-white shadow-lg' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'} ${challengeMode ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                        <Calculator size={16} /> 比例
-                    </button>
-                    <button
-                        onClick={() => { if (challengeMode) return; setGenre('geometry'); generateProblem(difficulty, 'geometry'); }}
-                        disabled={challengeMode}
-                        className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${genre === 'geometry' ? 'bg-teal-500 text-white shadow-lg' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'} ${challengeMode ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                        <Shapes size={16} /> 図形
-                    </button>
+                <div className="grid grid-cols-2 gap-2">
+                    {GENRE_TABS.map((tab) => {
+                        const Icon = tab.icon;
+                        const isActive = genre === tab.key;
+                        return (
+                            <button
+                                key={tab.key}
+                                onClick={() => { if (challengeMode) return; setGenre(tab.key); generateProblem(difficulty, tab.key); }}
+                                disabled={challengeMode}
+                                className={`py-2.5 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${isActive ? tab.activeClass : 'bg-slate-100 text-slate-500 hover:bg-slate-200'} ${challengeMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                <Icon size={14} />
+                                {tab.label}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
