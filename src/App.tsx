@@ -6,6 +6,7 @@ import AnswerInput from './components/AnswerInput';
 import RightSidebar from './components/RightSidebar';
 import ChallengeOverlay from './components/ChallengeOverlay';
 import ProblemEditor from './components/ProblemEditor';
+import ReloadPrompt from './components/ReloadPrompt';
 import { useAuthStore } from './stores/useAuthStore';
 import { isSupabaseConfigured } from './lib/supabase';
 import { Menu, BarChart3 } from 'lucide-react';
@@ -100,6 +101,8 @@ const MathStudioV2 = () => {
       <AnimatePresence>
         {editorOpen && <ProblemEditor onClose={() => setEditorOpen(false)} />}
       </AnimatePresence>
+
+      <ReloadPrompt />
     </div>
   );
 };
