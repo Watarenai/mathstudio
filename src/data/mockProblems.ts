@@ -11,7 +11,7 @@ import proportionalData from './proportionalProblems.json';
 export interface ProblemMeta {
     difficulty: 'Easy' | 'Normal' | 'Hard' | 'Expert';
     points: number;
-    unit: '比例' | '反比例' | '一次方程式';
+    unit: '比例' | '反比例' | '一次方程式' | '一次関数' | '連立方程式';
 }
 
 export interface Problem {
@@ -201,6 +201,136 @@ export function generateLinearEquation(difficulty: 'Easy' | 'Normal' | 'Hard' | 
         },
         hints,
         chips: [a.toString(), b.toString(), c.toString(), x.toString(), 'x', '=', '+', '-', '÷'],
+    };
+}
+
+// ============================================
+// 動的生成: 一次関数 (Linear Function)
+// y = ax + b
+// ============================================
+
+export function generateLinearFunction(difficulty: 'Easy' | 'Normal' | 'Hard' | 'Expert'): GeneratedProblem {
+    let a: number, b: number, x: number;
+    let text: string, answer: string, variants: string[];
+    let hints: string[] = [];
+    let chips: string[] = [];
+
+    // 傾きと切片をランダム生成
+    a = rand(2, 5) * (Math.random() > 0.5 ? 1 : -1);
+    b = rand(1, 10) * (Math.random() > 0.5 ? 1 : -1);
+
+    // Easy: xからyを求める (y = 2x + 3, x = 4)
+    if (difficulty === 'Easy') {
+        x = rand(1, 5);
+        const y = a * x + b;
+        const bStr = b >= 0 ? `+ ${b}` : `- ${Math.abs(b)}`;
+        text = `一次関数 y = ${a}x ${bStr} について、x = ${x} のときの y の値を求めなさい。`;
+        answer = y.toString();
+        variants = [`y=${y}`, `y = ${y}`, `${y}`];
+        hints = [
+            `式 y = ${a}x ${bStr} の x に ${x} を代入します。`,
+            `y = ${a} × ${x} ${bStr}`,
+            `y = ${a * x} ${bStr} = ${y}`,
+        ];
+        chips = [a.toString(), x.toString(), b.toString(), y.toString(), 'x', 'y', '=', '+', '-'];
+    }
+    // Normal: 傾きと1点から式を求める (変化の割合が2で、点(1,3)を通る)
+    else if (difficulty === 'Normal') {
+        x = rand(1, 4);
+        const y = a * x + b;
+        text = `変化の割合が ${a} で、点 (${x}, ${y}) を通る直線の式を求めなさい。`;
+        const bStr = b >= 0 ? `+${b}` : `${b}`; // スペースなしで正規化
+        answer = `y=${a}x${bStr}`;
+        variants = [`y = ${a}x ${b >= 0 ? `+ ${b}` : `- ${Math.abs(b)}`}`];
+        hints = [
+            `求める式を y = ${a}x + b と置きます。`,
+            `x = ${x}, y = ${y} を代入して b を求めます。`,
+            `${y} = ${a} × ${x} + b → ${y} = ${a * x} + b → b = ${b}`,
+        ];
+        chips = ['y', '=', 'x', '+', '-', a.toString(), b.toString(), x.toString(), y.toString()];
+    }
+    // Hard: 2点から式を求める (連立方程式を使わない解法)
+    else {
+        const x1 = rand(1, 3);
+        const x2 = x1 + rand(2, 4); // x2 > x1
+        const y1 = a * x1 + b;
+        const y2 = a * x2 + b;
+
+        text = `2点 (${x1}, ${y1}), (${x2}, ${y2}) を通る直線の式を求めなさい。`;
+        const bStr = b >= 0 ? `+${b}` : `${b}`;
+        answer = `y=${a}x${bStr}`;
+        variants = [`y = ${a}x ${b >= 0 ? `+ ${b}` : `- ${Math.abs(b)}`}`];
+        hints = [
+            `まず変化の割合（傾き）a を求めます: (yの増加量) ÷ (xの増加量)`,
+            `a = (${y2} - ${y1}) ÷ (${x2} - ${x1}) = ${a}`,
+            `y = ${a}x + b に1点の座標を代入して b を求めます。`,
+        ];
+        chips = ['y', '=', 'x', '+', '-', a.toString(), b.toString(), '2'];
+    }
+
+    return {
+        id: `lin-gen-${Date.now()}-${rand(0, 999)}`,
+        meta: { difficulty, points: POINTS_MAP[difficulty], unit: '一次関数' },
+        problem: { text, correct_answer: answer, answer_variants: variants },
+        hints,
+        chips,
+    };
+}
+
+// ============================================
+// 動的生成: 連立方程式 (Simultaneous Equations)
+// ax + by = c, dx + ey = f
+// ============================================
+
+export function generateSimultaneousEquation(difficulty: 'Easy' | 'Normal' | 'Hard' | 'Expert'): GeneratedProblem {
+    // 解を整数にするため逆算で生成
+    const x = rand(1, 6) * (Math.random() > 0.5 ? 1 : -1);
+    const y = rand(1, 6) * (Math.random() > 0.5 ? 1 : -1);
+
+    // 式1: ax + by = c
+    const a = rand(1, 4);
+    const b = rand(1, 4) * (Math.random() > 0.5 ? 1 : -1);
+    const c = a * x + b * y;
+
+    // 式2: dx + ey = f
+    let d = rand(1, 4);
+    /* d/a != e/b になるように調整（平行にならないように） */
+    let e = rand(1, 4) * (Math.random() > 0.5 ? 1 : -1);
+    while (a * e === b * d) {
+        e = rand(1, 5) * (Math.random() > 0.5 ? 1 : -1);
+    }
+    const f = d * x + e * y;
+
+
+    // 係数が1の場合は数字を省略
+    const formatTerm = (coef: number, val: string) => {
+        if (coef === 1) return val;
+        if (coef === -1) return `-${val}`;
+        return `${coef}${val}`;
+    }
+
+    const eq1 = `${formatTerm(a, 'x')} ${b >= 0 ? '+' : '-'} ${formatTerm(Math.abs(b), 'y')} = ${c}`;
+    const eq2 = `${formatTerm(d, 'x')} ${e >= 0 ? '+' : '-'} ${formatTerm(Math.abs(e), 'y')} = ${f}`;
+
+    const text = `次の連立方程式を解きなさい。\n${eq1} ...①\n${eq2} ...②`;
+    const answer = `x=${x},y=${y}`; // スペースなし
+
+    const variants = [
+        `x = ${x}, y = ${y}`,
+        `x=${x}, y=${y}`,
+        `x:${x},y:${y}`
+    ];
+
+    return {
+        id: `sys-gen-${Date.now()}-${rand(0, 999)}`,
+        meta: { difficulty, points: POINTS_MAP[difficulty] + 50, unit: '連立方程式' }, // 少し配点高め
+        problem: { text, correct_answer: answer, answer_variants: variants },
+        hints: [
+            `①か②の式を変形して、代入法か加減法で解きます。`,
+            `片方の文字を消去することを目指しましょう。`,
+            `解: x = ${x}, y = ${y}`,
+        ],
+        chips: ['x', 'y', '=', ',', x.toString(), y.toString(), a.toString(), d.toString()],
     };
 }
 

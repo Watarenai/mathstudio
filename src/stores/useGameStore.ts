@@ -1,6 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { GeneratedProblem, getRandomProblemByDifficulty, checkAnswer, generateInverseProportion, generateLinearEquation } from '../data/mockProblems';
+import {
+    GeneratedProblem,
+    getRandomProblemByDifficulty,
+    checkAnswer,
+    generateInverseProportion,
+    generateLinearEquation,
+    generateLinearFunction,
+    generateSimultaneousEquation
+} from '../data/mockProblems';
 import { GeometryProblem, getRandomGeometryProblemByDifficulty, generateSectorProblem } from '../data/geometryProblems';
 
 // 履歴データの型
@@ -19,7 +27,7 @@ export interface WrongAnswerItem {
 }
 
 export type Difficulty = 'Easy' | 'Normal' | 'Hard' | 'Expert';
-export type Genre = 'proportional' | 'geometry' | 'inverse' | 'equation' | 'sector';
+export type Genre = 'proportional' | 'geometry' | 'inverse' | 'equation' | 'sector' | 'linear';
 export type WorkspaceMode = 'input' | 'drawing';
 export type AnswerStatus = 'idle' | 'correct' | 'incorrect';
 
@@ -67,9 +75,15 @@ function getProblemByGenre(genre: Genre, difficulty: Difficulty): GeneratedProbl
         case 'inverse':
             return generateInverseProportion(difficulty);
         case 'equation':
+            // Hard以上は50%で連立方程式
+            if ((difficulty === 'Hard' || difficulty === 'Expert') && Math.random() > 0.5) {
+                return generateSimultaneousEquation(difficulty);
+            }
             return generateLinearEquation(difficulty);
         case 'sector':
             return generateSectorProblem(difficulty);
+        case 'linear':
+            return generateLinearFunction(difficulty);
         default:
             return getRandomProblemByDifficulty(difficulty);
     }

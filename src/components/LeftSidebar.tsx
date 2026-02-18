@@ -23,6 +23,7 @@ const GENRE_TABS: GenreConfig[] = [
     { key: 'proportional', label: '比例', icon: Calculator, activeClass: 'bg-indigo-500 text-white shadow-lg shadow-indigo-200' },
     { key: 'inverse', label: '反比例', icon: ArrowDownUp, activeClass: 'bg-purple-500 text-white shadow-lg shadow-purple-200' },
     { key: 'equation', label: '方程式', icon: Variable, activeClass: 'bg-rose-500 text-white shadow-lg shadow-rose-200' },
+    { key: 'linear', label: '一次関数', icon: ArrowDownUp, activeClass: 'bg-fuchsia-500 text-white shadow-lg shadow-fuchsia-200' },
     { key: 'geometry', label: '図形', icon: Shapes, activeClass: 'bg-teal-500 text-white shadow-lg shadow-teal-200' },
     { key: 'sector', label: 'おうぎ形', icon: Circle, activeClass: 'bg-cyan-500 text-white shadow-lg shadow-cyan-200' },
 ];
