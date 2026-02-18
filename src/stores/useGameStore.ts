@@ -60,6 +60,15 @@ function generateChallengeProblems(count: number, genre: Genre): (GeneratedProbl
     return problems.slice(0, count);
 }
 
+// 不正解時の励ましメッセージ
+const ENCOURAGEMENTS = [
+    'おしい！もう少し！',
+    'がんばって！ヒントを使ってみよう',
+    'あと一歩！もう一回やってみよう',
+    'ドンマイ！考え方は合ってるかも',
+    'もう一度チャレンジしよう！',
+];
+
 interface GameState {
     // Problem state
     difficulty: Difficulty;
@@ -85,12 +94,18 @@ interface GameState {
     // Workspace state
     workspaceMode: WorkspaceMode;
 
+    // LD Accessibility
+    fontSize: number;  // 1=小, 2=中(default), 3=大
+    streak: number;     // 連続正解数
+    encouragement: string; // 不正解時の励ましメッセージ
+
     // Actions
     setDifficulty: (d: Difficulty) => void;
     setGenre: (g: Genre) => void;
     setUserAnswer: (a: string) => void;
     setProblemCountInput: (n: number) => void;
     setWorkspaceMode: (m: WorkspaceMode) => void;
+    setFontSize: (s: number) => void;
     generateProblem: (level?: Difficulty, selectedGenre?: Genre) => void;
     startChallenge: () => void;
     exitChallenge: () => void;
@@ -100,6 +115,7 @@ interface GameState {
     requestHint: () => void;
     retryProblem: (item: WrongAnswerItem) => void;
     advanceChallenge: () => void;
+    speakProblem: () => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -122,6 +138,9 @@ export const useGameStore = create<GameState>()(
             challengeIndex: 0,
             challengeComplete: false,
             workspaceMode: 'input',
+            fontSize: 2,
+            streak: 0,
+            encouragement: '',
 
             // Simple setters
             setDifficulty: (d) => set({ difficulty: d }),
@@ -129,6 +148,7 @@ export const useGameStore = create<GameState>()(
             setUserAnswer: (a) => set({ userAnswer: a, status: 'idle' }),
             setProblemCountInput: (n) => set({ problemCountInput: Math.max(1, Math.min(50, n)) }),
             setWorkspaceMode: (m) => set({ workspaceMode: m }),
+            setFontSize: (s) => set({ fontSize: Math.max(1, Math.min(3, s)) }),
 
             // Generate a new problem
             generateProblem: (level, selectedGenre) => {
@@ -205,14 +225,14 @@ export const useGameStore = create<GameState>()(
                 set((s) => ({ userAnswer: s.userAnswer.slice(0, -1), status: 'idle' }));
             },
 
-            // Hint
+            // Hint（ペナルティなし — ヒントは学びの一部）
             requestHint: () => {
                 const { currentProblem, hintIndex } = get();
                 if (!currentProblem) return;
                 if (hintIndex < currentProblem.hints.length - 1) {
                     set((s) => ({
                         hintIndex: s.hintIndex + 1,
-                        currentProblemPoints: Math.max(s.currentProblemPoints - 15, 10),
+                        // ペナルティ撤廃: currentProblemPoints は変更しない
                     }));
                 }
             },
@@ -228,6 +248,8 @@ export const useGameStore = create<GameState>()(
                     set((s) => ({
                         status: 'correct',
                         score: s.score + finalPoints,
+                        streak: s.streak + 1,
+                        encouragement: '',
                         history: [{
                             id: Date.now().toString(),
                             points: finalPoints,
@@ -235,9 +257,12 @@ export const useGameStore = create<GameState>()(
                         }, ...s.history],
                     }));
                 } else {
+                    const msg = ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)];
                     set((s) => ({
                         status: 'incorrect',
-                        currentProblemPoints: Math.max(s.currentProblemPoints - 20, 10),
+                        streak: 0,
+                        encouragement: msg,
+                        // ペナルティ撤廃: currentProblemPoints は変更しない
                         wrongAnswers: currentProblem && !s.wrongAnswers.some(w => w.problem.id === currentProblem.id)
                             ? [...s.wrongAnswers, { id: Date.now().toString(), problem: currentProblem, userAnswer, timestamp: Date.now() }]
                             : s.wrongAnswers,
@@ -257,6 +282,18 @@ export const useGameStore = create<GameState>()(
                     wrongAnswers: s.wrongAnswers.filter(w => w.id !== item.id),
                 }));
             },
+
+            // TTS 読み上げ
+            speakProblem: () => {
+                const { currentProblem } = get();
+                if (!currentProblem) return;
+                speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(currentProblem.problem.text);
+                utterance.lang = 'ja-JP';
+                utterance.rate = 0.85;
+                utterance.pitch = 1.1;
+                speechSynthesis.speak(utterance);
+            },
         }),
         {
             name: 'mathstudio-progress',
@@ -266,6 +303,7 @@ export const useGameStore = create<GameState>()(
                 wrongAnswers: state.wrongAnswers,
                 difficulty: state.difficulty,
                 genre: state.genre,
+                fontSize: state.fontSize,
             }),
         }
     )

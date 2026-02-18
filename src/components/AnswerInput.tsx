@@ -1,32 +1,65 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Keyboard, PenTool, Delete } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Keyboard, PenTool, Delete, Flame, Type } from 'lucide-react';
 import { Tldraw } from 'tldraw';
 import 'tldraw/tldraw.css';
 import { useGameStore } from '../stores/useGameStore';
 
 const AnswerInput: React.FC = () => {
     const {
-        userAnswer, status, workspaceMode,
-        setUserAnswer, setWorkspaceMode, handleCheck, insertChar, backspace,
+        userAnswer, status, workspaceMode, streak, encouragement, fontSize,
+        setUserAnswer, setWorkspaceMode, setFontSize, handleCheck, insertChar, backspace,
     } = useGameStore();
+
+    const inputTextSize = fontSize === 1 ? 'text-lg md:text-xl' : fontSize === 3 ? 'text-3xl md:text-4xl' : 'text-xl md:text-3xl';
 
     return (
         <>
-            {/* Mode Toggle */}
-            <div className="flex items-center justify-center p-1 bg-slate-200/50 rounded-xl self-center shadow-inner">
-                <button
-                    onClick={() => setWorkspaceMode('input')}
-                    className={`flex items-center gap-2 px-4 md:px-6 py-2 rounded-lg text-sm font-bold transition-all ${workspaceMode === 'input' ? 'bg-white text-slate-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                    <Keyboard size={16} /> 入力
-                </button>
-                <button
-                    onClick={() => setWorkspaceMode('drawing')}
-                    className={`flex items-center gap-2 px-4 md:px-6 py-2 rounded-lg text-sm font-bold transition-all ${workspaceMode === 'drawing' ? 'bg-white text-slate-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                    <PenTool size={16} /> 考える
-                </button>
+            {/* Top Bar: Mode Toggle + Streak + Font Size */}
+            <div className="flex items-center gap-2 flex-wrap">
+                {/* Mode Toggle */}
+                <div className="flex items-center p-1 bg-slate-200/50 rounded-xl shadow-inner">
+                    <button
+                        onClick={() => setWorkspaceMode('input')}
+                        className={`flex items-center gap-2 px-4 md:px-6 py-2 rounded-lg text-sm font-bold transition-all ${workspaceMode === 'input' ? 'bg-white text-slate-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                    >
+                        <Keyboard size={16} /> 入力
+                    </button>
+                    <button
+                        onClick={() => setWorkspaceMode('drawing')}
+                        className={`flex items-center gap-2 px-4 md:px-6 py-2 rounded-lg text-sm font-bold transition-all ${workspaceMode === 'drawing' ? 'bg-white text-slate-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                    >
+                        <PenTool size={16} /> 考える
+                    </button>
+                </div>
+
+                {/* Streak */}
+                <AnimatePresence>
+                    {streak >= 2 && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 rounded-xl text-orange-500 font-bold text-sm border border-orange-100"
+                        >
+                            <Flame size={16} /> {streak} 連続正解！
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Font Size */}
+                <div className="flex items-center gap-1 ml-auto">
+                    <Type size={14} className="text-slate-300" />
+                    {[1, 2, 3].map(s => (
+                        <button
+                            key={s}
+                            onClick={() => setFontSize(s)}
+                            className={`w-7 h-7 rounded-lg text-xs font-bold transition-all ${fontSize === s ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                        >
+                            {s === 1 ? '小' : s === 2 ? '中' : '大'}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Workspace */}
@@ -41,8 +74,8 @@ const AnswerInput: React.FC = () => {
                                 onChange={(e) => { if (status === 'correct') return; setUserAnswer(e.target.value); }}
                                 onKeyDown={(e) => { if (e.key === 'Enter' && userAnswer && status !== 'correct') handleCheck(); }}
                                 placeholder="y = "
-                                className={`w-full p-4 md:p-6 text-xl md:text-3xl font-mono rounded-[16px] md:rounded-[24px] border-4 outline-none transition-all shadow-sm pr-20 md:pr-24 ${status === 'correct' ? 'border-emerald-400 bg-emerald-50 text-emerald-700' :
-                                    status === 'incorrect' ? 'border-rose-300 bg-rose-50 text-rose-700' : 'border-slate-100 bg-white focus:border-sky-400'}`}
+                                className={`w-full p-4 md:p-6 ${inputTextSize} font-mono rounded-[16px] md:rounded-[24px] border-4 outline-none transition-all shadow-sm pr-20 md:pr-24 ${status === 'correct' ? 'border-emerald-400 bg-emerald-50 text-emerald-700' :
+                                    status === 'incorrect' ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-slate-100 bg-white focus:border-sky-400'}`}
                             />
                             {status === 'correct' && (
                                 <motion.div
@@ -50,8 +83,10 @@ const AnswerInput: React.FC = () => {
                                     className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-[16px] md:rounded-[24px] z-10"
                                 >
                                     <div className="text-center">
-                                        <span className="text-xl md:text-2xl font-black text-emerald-500 block mb-1">Excellent!</span>
-                                        <span className="text-xs md:text-sm text-emerald-400 font-bold">Next problem coming...</span>
+                                        <span className="text-xl md:text-2xl font-black text-emerald-500 block mb-1">
+                                            {streak >= 3 ? '🔥 すごい！' : streak >= 2 ? '✨ いいね！' : '⭐ 正解！'}
+                                        </span>
+                                        <span className="text-xs md:text-sm text-emerald-400 font-bold">次の問題にいくよ...</span>
                                     </div>
                                 </motion.div>
                             )}
@@ -65,6 +100,20 @@ const AnswerInput: React.FC = () => {
                                 </button>
                             </div>
                         </div>
+
+                        {/* Encouragement on incorrect */}
+                        <AnimatePresence>
+                            {status === 'incorrect' && encouragement && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0 }}
+                                    className="mb-3 p-3 bg-amber-50 rounded-2xl border border-amber-100 text-amber-700 text-sm font-bold text-center"
+                                >
+                                    💪 {encouragement}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
                         {/* Virtual Keyboard */}
                         <div className="bg-slate-50 p-2 md:p-3 rounded-[16px] md:rounded-[24px] grid grid-cols-7 gap-1.5 md:gap-2 shadow-inner select-none flex-1 content-start">
