@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Calculator, Shapes, Sprout, Sword, Flame, Crown, RotateCcw, Play, ArrowDownUp, Variable, Circle } from 'lucide-react';
+import { Calculator, Shapes, Sprout, Sword, Flame, Crown, RotateCcw, Play, ArrowDownUp, Variable, Circle, X } from 'lucide-react';
 import { useGameStore, Difficulty, Genre } from '../stores/useGameStore';
 
 const DIFFICULTY_CONFIG: Record<Difficulty, { color: string; bgColor: string; activeBg: string; textColor: string; icon: any; shadowConfig: string }> = {
@@ -27,7 +27,11 @@ const GENRE_TABS: GenreConfig[] = [
     { key: 'sector', label: 'おうぎ形', icon: Circle, activeClass: 'bg-cyan-500 text-white shadow-lg shadow-cyan-200' },
 ];
 
-const LeftSidebar: React.FC = () => {
+interface LeftSidebarProps {
+    onClose?: () => void;
+}
+
+const LeftSidebar: React.FC<LeftSidebarProps> = ({ onClose }) => {
     const {
         difficulty, genre, challengeMode, problemCountInput,
         challengeIndex, challengeProblems,
@@ -35,8 +39,31 @@ const LeftSidebar: React.FC = () => {
         setProblemCountInput, startChallenge, exitChallenge,
     } = useGameStore();
 
+    const handleGenreClick = (key: Genre) => {
+        if (challengeMode) return;
+        setGenre(key);
+        generateProblem(difficulty, key);
+        onClose?.();
+    };
+
+    const handleDifficultyClick = (lvl: Difficulty) => {
+        if (challengeMode) return;
+        setDifficulty(lvl);
+        generateProblem(lvl);
+        onClose?.();
+    };
+
     return (
-        <aside className="w-72 flex-shrink-0 bg-white border-r border-slate-200 p-8 flex flex-col gap-6 shadow-[4px_0_24px_rgba(0,0,0,0,0.02)] z-10 overflow-y-auto custom-scrollbar">
+        <aside className="w-72 h-full flex-shrink-0 bg-white border-r border-slate-200 p-6 md:p-8 flex flex-col gap-5 md:gap-6 shadow-[4px_0_24px_rgba(0,0,0,0.02)] overflow-y-auto custom-scrollbar">
+            {/* Mobile close button */}
+            {onClose && (
+                <div className="flex justify-end lg:hidden -mb-2">
+                    <button onClick={onClose} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
+                        <X size={20} />
+                    </button>
+                </div>
+            )}
+
             {/* Genre tabs */}
             <div>
                 <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Genre</h2>
@@ -47,7 +74,7 @@ const LeftSidebar: React.FC = () => {
                         return (
                             <button
                                 key={tab.key}
-                                onClick={() => { if (challengeMode) return; setGenre(tab.key); generateProblem(difficulty, tab.key); }}
+                                onClick={() => handleGenreClick(tab.key)}
                                 disabled={challengeMode}
                                 className={`py-2.5 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${isActive ? tab.activeClass : 'bg-slate-100 text-slate-500 hover:bg-slate-200'} ${challengeMode ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
@@ -61,8 +88,8 @@ const LeftSidebar: React.FC = () => {
 
             {/* Quest Level */}
             <div>
-                <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Quest Level</h2>
-                <div className="space-y-3">
+                <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 md:mb-6">Quest Level</h2>
+                <div className="space-y-2 md:space-y-3">
                     {(Object.keys(DIFFICULTY_CONFIG) as Difficulty[]).map((lvl) => {
                         const theme = DIFFICULTY_CONFIG[lvl];
                         const Icon = theme.icon;
@@ -70,9 +97,9 @@ const LeftSidebar: React.FC = () => {
                         return (
                             <button
                                 key={lvl}
-                                onClick={() => { if (challengeMode) return; setDifficulty(lvl); generateProblem(lvl); }}
+                                onClick={() => handleDifficultyClick(lvl)}
                                 disabled={challengeMode}
-                                className={`w-full py-4 px-6 rounded-2xl font-bold text-left transition-all relative overflow-hidden group flex items-center gap-3 ${isActive ? `${theme.activeBg} text-white shadow-lg ${theme.shadowConfig}` : `${theme.bgColor} ${theme.textColor} hover:brightness-95`} ${challengeMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`w-full py-3 md:py-4 px-5 md:px-6 rounded-2xl font-bold text-left transition-all relative overflow-hidden group flex items-center gap-3 ${isActive ? `${theme.activeBg} text-white shadow-lg ${theme.shadowConfig}` : `${theme.bgColor} ${theme.textColor} hover:brightness-95`} ${challengeMode ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 <Icon size={20} className={isActive ? 'text-white' : theme.textColor} />
                                 <span>{lvl}</span>
@@ -84,7 +111,7 @@ const LeftSidebar: React.FC = () => {
             </div>
 
             {/* Challenge Mode */}
-            <div className="border-t border-slate-100 pt-6">
+            <div className="border-t border-slate-100 pt-5 md:pt-6">
                 <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Challenge Mode</h2>
                 {!challengeMode ? (
                     <div className="space-y-3">
@@ -98,7 +125,7 @@ const LeftSidebar: React.FC = () => {
                             <span className="text-sm text-slate-400 font-medium">問</span>
                         </div>
                         <p className="text-[10px] text-slate-300">Easy 50% / Normal 30% / Hard 20%</p>
-                        <button onClick={startChallenge} className="w-full py-4 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-orange-200 hover:shadow-xl active:scale-95 transition-all">
+                        <button onClick={() => { startChallenge(); onClose?.(); }} className="w-full py-3 md:py-4 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-orange-200 hover:shadow-xl active:scale-95 transition-all">
                             <Play size={18} /> チャレンジ開始
                         </button>
                     </div>
@@ -119,9 +146,9 @@ const LeftSidebar: React.FC = () => {
             </div>
 
             <button
-                onClick={() => !challengeMode && generateProblem()}
+                onClick={() => { if (!challengeMode) { generateProblem(); onClose?.(); } }}
                 disabled={challengeMode}
-                className="mt-auto flex items-center justify-center gap-2 py-4 border-2 border-slate-200 rounded-2xl font-bold text-slate-400 hover:border-sky-400 hover:text-sky-400 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-auto flex items-center justify-center gap-2 py-3 md:py-4 border-2 border-slate-200 rounded-2xl font-bold text-slate-400 hover:border-sky-400 hover:text-sky-400 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <RotateCcw size={18} /> 問題をかえる
             </button>

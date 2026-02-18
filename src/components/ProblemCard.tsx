@@ -14,29 +14,29 @@ const ProblemCard: React.FC = () => {
         : DIFFICULTY_CONFIG[difficulty];
 
     return (
-        <section className="bg-white p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 relative overflow-hidden flex-shrink-0">
+        <section className="bg-white p-5 md:p-8 rounded-[24px] md:rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 relative overflow-hidden flex-shrink-0">
             <div className={`absolute top-0 left-0 w-2 h-full bg-${currentTheme.color}-400`} />
-            <div className="flex justify-between items-start mb-4">
-                <span className={`text-xs font-black text-${currentTheme.color}-500 uppercase tracking-widest bg-${currentTheme.color}-50 px-3 py-1 rounded-lg`}>
+            <div className="flex justify-between items-start mb-3 md:mb-4">
+                <span className={`text-[10px] font-black text-${currentTheme.color}-500 uppercase tracking-widest bg-${currentTheme.color}-50 px-3 py-1 rounded-lg`}>
                     Mission
                 </span>
-                <div className={`flex items-center gap-2 font-bold ${currentProblemPoints < 100 ? 'text-rose-400' : 'text-slate-300'}`}>
+                <div className={`flex items-center gap-2 font-bold text-sm ${currentProblemPoints < 100 ? 'text-rose-400' : 'text-slate-300'}`}>
                     <Hash size={14} /> {currentProblemPoints} pts
                     {currentProblemPoints < 100 && <span className="text-xs">(-{100 - currentProblemPoints})</span>}
                 </div>
             </div>
-            <p className="text-xl font-bold leading-relaxed text-slate-800 mb-6">
+            <p className="text-base md:text-xl font-bold leading-relaxed text-slate-800 mb-4 md:mb-6">
                 {currentProblem.problem.text}
             </p>
 
             {/* Hints */}
-            <div className="space-y-3">
+            <div className="space-y-2 md:space-y-3">
                 <AnimatePresence>
                     {hintIndex >= 0 && (
                         <motion.div
                             initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="p-3 bg-amber-50 rounded-2xl border border-amber-100 text-amber-800 text-sm font-medium flex gap-3 shadow-sm"
+                            className="p-3 bg-amber-50 rounded-xl md:rounded-2xl border border-amber-100 text-amber-800 text-sm font-medium flex gap-3 shadow-sm"
                         >
                             <Lightbulb className="shrink-0 text-amber-400" size={18} />
                             <div>{currentProblem.hints[hintIndex]}</div>
