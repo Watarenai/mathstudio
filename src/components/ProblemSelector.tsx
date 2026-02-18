@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { BookOpen, PenTool, Hash, BrainCircuit } from 'lucide-react';
+import { BookOpen, PenTool, Hash, BrainCircuit, Shapes } from 'lucide-react';
 
-export type ProblemCategory = 'simple' | 'fraction' | 'graph' | 'word' | 'advanced';
+export type ProblemCategory = 'simple' | 'fraction' | 'graph' | 'word' | 'advanced' | 'geometry';
 
 export interface Problem {
     id: string;
@@ -43,81 +43,172 @@ const PROBLEMS: Problem[] = [
     { id: 'w6', category: 'word', title: '動点と面積', text: '底辺 12cm, 高さ 8cm の三角形... (略)', formula: 'y = 6x', coefficient: 6 },
 
     // --- 5. Advanced / Conceptual (New ID 121+) ---
-    { 
-        id: '121', category: 'advanced', title: '反比例の性質 1', 
-        text: '反比例 y = a/x のグラフで、xの値が2倍になるとyの値はどうなりますか？', 
+    {
+        id: '121', category: 'advanced', title: '反比例の性質 1',
+        text: '反比例 y = a/x のグラフで、xの値が2倍になるとyの値はどうなりますか？',
         keywords: ['半分', '1/2', '0.5'],
         graphMode: 'inverse'
     },
-    { 
-        id: '122', category: 'advanced', title: '反比例の性質 2', 
-        text: '反比例のグラフの曲線を何といいますか？', 
+    {
+        id: '122', category: 'advanced', title: '反比例の性質 2',
+        text: '反比例のグラフの曲線を何といいますか？',
         keywords: ['双曲線', 'そうきょくせん'],
         graphMode: 'inverse'
     },
 
     // --- Area Calculation (ID 131+) ---
-    { 
-        id: '131', category: 'advanced', title: '面積と比例定数 1', 
-        text: '反比例のグラフ上の点 A(4, 5) から軸に垂線を引いてできる長方形の面積は？', 
-        coefficient: 20, 
-        graphMode: 'area' 
+    {
+        id: '131', category: 'advanced', title: '面積と比例定数 1',
+        text: '反比例のグラフ上の点 A(4, 5) から軸に垂線を引いてできる長方形の面積は？',
+        coefficient: 20,
+        graphMode: 'area'
     },
-    { 
-        id: '132', category: 'advanced', title: '面積と比例定数 2', 
-        text: '反比例のグラフ上の点 B(3, -6) X軸Y軸で作る長方形の面積は？(絶対値)', 
-        coefficient: 18, 
-        graphMode: 'area' 
+    {
+        id: '132', category: 'advanced', title: '面積と比例定数 2',
+        text: '反比例のグラフ上の点 B(3, -6) X軸Y軸で作る長方形の面積は？(絶対値)',
+        coefficient: 18,
+        graphMode: 'area'
     },
-    { 
-        id: '133', category: 'advanced', title: '面積と比例定数 3', 
-        text: 'グラフ上の点(5, 1.2)の作る面積は？', 
-        coefficient: 6, 
-        graphMode: 'area' 
+    {
+        id: '133', category: 'advanced', title: '面積と比例定数 3',
+        text: 'グラフ上の点(5, 1.2)の作る面積は？',
+        coefficient: 6,
+        graphMode: 'area'
     },
-    { 
-        id: '134', category: 'advanced', title: '面積と比例定数 4', 
-        text: 'グラフ上の点(8, 0.5)の作る面積は？', 
-        coefficient: 4, 
-        graphMode: 'area' 
+    {
+        id: '134', category: 'advanced', title: '面積と比例定数 4',
+        text: 'グラフ上の点(8, 0.5)の作る面積は？',
+        coefficient: 4,
+        graphMode: 'area'
     },
-    { 
-        id: '135', category: 'advanced', title: '面積と比例定数 5', 
-        text: 'グラフ上の点(10, 15)の作る面積は？', 
-        coefficient: 150, 
-        graphMode: 'area' 
+    {
+        id: '135', category: 'advanced', title: '面積と比例定数 5',
+        text: 'グラフ上の点(10, 15)の作る面積は？',
+        coefficient: 150,
+        graphMode: 'area'
     },
 
     // --- Tricky Calculation (ID 136+) ---
-    { 
-        id: '136', category: 'advanced', title: '分数座標 1', 
-        text: '反比例 y=a/x が点(2/3, 9)を通るとき、aの値は？', 
-        coefficient: 6, 
-        graphMode: 'inverse' 
+    {
+        id: '136', category: 'advanced', title: '分数座標 1',
+        text: '反比例 y=a/x が点(2/3, 9)を通るとき、aの値は？',
+        coefficient: 6,
+        graphMode: 'inverse'
     },
-    { 
-        id: '137', category: 'advanced', title: '分数座標 2', 
-        text: '反比例 y=a/x が点(3/4, 16)を通るとき、aの値は？', 
-        coefficient: 12, 
-        graphMode: 'inverse' 
+    {
+        id: '137', category: 'advanced', title: '分数座標 2',
+        text: '反比例 y=a/x が点(3/4, 16)を通るとき、aの値は？',
+        coefficient: 12,
+        graphMode: 'inverse'
     },
-    { 
-        id: '138', category: 'advanced', title: '分数座標 3', 
-        text: '反比例 y=a/x が点(5/2, 4)を通るとき、aの値は？', 
-        coefficient: 10, 
-        graphMode: 'inverse' 
+    {
+        id: '138', category: 'advanced', title: '分数座標 3',
+        text: '反比例 y=a/x が点(5/2, 4)を通るとき、aの値は？',
+        coefficient: 10,
+        graphMode: 'inverse'
     },
-    { 
-        id: '139', category: 'advanced', title: '分数座標 4', 
-        text: '反比例 y=a/x が点(0.5, 8)を通るとき、aの値は？', 
-        coefficient: 4, 
-        graphMode: 'inverse' 
+    {
+        id: '139', category: 'advanced', title: '分数座標 4',
+        text: '反比例 y=a/x が点(0.5, 8)を通るとき、aの値は？',
+        coefficient: 4,
+        graphMode: 'inverse'
     },
-    { 
-        id: '140', category: 'advanced', title: '分数座標 5', 
-        text: '反比例 y=a/x が点(1/5, 100)を通るとき、aの値は？', 
-        coefficient: 20, 
-        graphMode: 'inverse' 
+    {
+        id: '140', category: 'advanced', title: '分数座標 5',
+        text: '反比例 y=a/x が点(1/5, 100)を通るとき、aの値は？',
+        coefficient: 20,
+        graphMode: 'inverse'
+    },
+
+    // --- 6. Geometry / 図形 (平行移動・回転移動・点対称・角度) ---
+    // -- 平行移動 (Translation) --
+    {
+        id: 'geo1', category: 'geometry', title: '平行移動 1',
+        text: '△ABCを矢印OPの方向に、矢印の長さだけ平行移動させた△A\'B\'C\'をかきなさい。',
+        keywords: ['平行移動', '同じ方向', '同じ長さ']
+    },
+    {
+        id: 'geo2', category: 'geometry', title: '平行移動 2',
+        text: '△ABCを平行移動させた△A\'B\'C\'で、点C\'は辺BCの延長上にある。BC=12cm, B\'C\'=3cmのとき、線分BC\'の長さを求めなさい。',
+        coefficient: 15,
+        keywords: ['15']
+    },
+    {
+        id: 'geo3', category: 'geometry', title: '平行移動 3',
+        text: '平行移動では、対応する点を結ぶ線分はどのような関係にありますか？',
+        keywords: ['平行', '等しい', '同じ長さ']
+    },
+
+    // -- 回転移動 (Rotation) --
+    {
+        id: 'geo4', category: 'geometry', title: '回転移動 1',
+        text: '△ABOを、点Oを中心として反時計回りに90°だけ回転移動させた△A\'B\'Oをかきなさい。',
+        keywords: ['90', '反時計回り', '回転']
+    },
+    {
+        id: 'geo5', category: 'geometry', title: '回転移動 2',
+        text: '△ABCを点Oを中心に180°回転移動させた図形を何といいますか？',
+        keywords: ['点対称', '180']
+    },
+    {
+        id: 'geo6', category: 'geometry', title: '回転移動 3',
+        text: '正三角形を中心のまわりに何度回転させると自分自身に重なりますか？（最小の角度）',
+        coefficient: 120,
+        keywords: ['120']
+    },
+    {
+        id: 'geo7', category: 'geometry', title: '回転移動 4',
+        text: '正方形を中心のまわりに回転移動して自分自身に重ねるとき、可能な回転角をすべて答えなさい。',
+        keywords: ['90', '180', '270', '360']
+    },
+
+    // -- 点対称移動 (Point Symmetry) --
+    {
+        id: 'geo8', category: 'geometry', title: '点対称移動 1',
+        text: '△ABCを、点Oを中心として点対称移動させた△A\'B\'C\'をかきなさい。',
+        keywords: ['点対称', '180°回転', 'O']
+    },
+    {
+        id: 'geo9', category: 'geometry', title: '点対称移動 2',
+        text: '点対称移動で、対応する点と中心Oの関係を説明しなさい。',
+        keywords: ['中点', '一直線', 'Oを通る', '等しい距離']
+    },
+
+    // -- 角度 (Angles) --
+    {
+        id: 'geo10', category: 'geometry', title: '角度 1',
+        text: '直線AB上にOがあり、∠AOC = ∠COD, ∠DOE = ∠EOB であるとき、∠COEの大きさを求めなさい。',
+        coefficient: 90,
+        keywords: ['90']
+    },
+    {
+        id: 'geo11', category: 'geometry', title: '角度 2',
+        text: '対頂角の性質を答えなさい。',
+        keywords: ['等しい', '同じ']
+    },
+    {
+        id: 'geo12', category: 'geometry', title: '角度 3',
+        text: '∠xの対頂角が55°のとき、∠xは何度ですか？',
+        coefficient: 55,
+        keywords: ['55']
+    },
+    {
+        id: 'geo13', category: 'geometry', title: '角度 4',
+        text: '一直線が作る角は何度ですか？',
+        coefficient: 180,
+        keywords: ['180']
+    },
+
+    // -- 回転移動の説明 (Rotation Descriptions) --
+    {
+        id: 'geo14', category: 'geometry', title: '回転移動の説明',
+        text: '長方形ABCDを4つの合同な直角二等辺三角形に分けた。アの三角形は1回の回転移動でイの三角形に重ね合わせることができる。どのような回転移動か説明しなさい。',
+        keywords: ['90', '回転', '中心']
+    },
+    {
+        id: 'geo15', category: 'geometry', title: '作図と移動',
+        text: '線分ABの垂直二等分線を作図しなさい。（コンパスと定規を使う）',
+        keywords: ['垂直二等分線', 'コンパス', '交点']
     },
 ];
 
@@ -135,6 +226,7 @@ const ProblemSelector: React.FC<ProblemSelectorProps> = ({ onSelectProblem, onDo
         { id: 'graph', label: 'グラフ', icon: <PenTool size={18} /> },
         { id: 'word', label: '文章', icon: <BookOpen size={18} /> },
         { id: 'advanced', label: '応用', icon: <BrainCircuit size={18} /> },
+        { id: 'geometry', label: '図形', icon: <Shapes size={18} /> },
     ];
 
     const filteredProblems = PROBLEMS.filter(p => p.category === activeCategory);
@@ -169,9 +261,12 @@ const ProblemSelector: React.FC<ProblemSelectorProps> = ({ onSelectProblem, onDo
                     >
                         <div className="flex justify-between items-center mb-1">
                             <span className="font-bold text-slate-700 text-sm border-b border-slate-300 pb-0.5">{problem.title}</span>
-                             {problem.category === 'advanced' && (
-                                <span className="text-[10px] bg-purple-100 text-purple-700 px-1 rounded">Advanced</span>
-                             )}
+                            {problem.category === 'advanced' && (
+                                <span className="text-[10px] bg-purple-100 text-purple-700 px-1 rounded">応用</span>
+                            )}
+                            {problem.category === 'geometry' && (
+                                <span className="text-[10px] bg-teal-100 text-teal-700 px-1 rounded">図形</span>
+                            )}
                         </div>
                         <p className="text-sm text-slate-800 leading-relaxed font-medium mt-1">
                             {problem.text}

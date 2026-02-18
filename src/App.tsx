@@ -63,17 +63,19 @@ const DIFFICULTY_CONFIG = {
 
 // チャレンジ用問題リスト生成 (40% Easy, 30% Normal, 20% Hard, 10% Expert)
 // グラデーション: Easy → Normal → Hard → Expert の順で出題
-const generateChallengeProblems = (count: number): GeneratedProblem[] => {
+const generateChallengeProblems = (count: number, genre: 'proportional' | 'geometry'): (GeneratedProblem | GeometryProblem)[] => {
   const easyCount = Math.round(count * 0.4);
   const normalCount = Math.round(count * 0.3);
   const hardCount = Math.round(count * 0.2);
   const expertCount = count - easyCount - normalCount - hardCount;
 
-  const problems: GeneratedProblem[] = [];
-  for (let i = 0; i < easyCount; i++) problems.push(getRandomProblemByDifficulty('Easy'));
-  for (let i = 0; i < normalCount; i++) problems.push(getRandomProblemByDifficulty('Normal'));
-  for (let i = 0; i < hardCount; i++) problems.push(getRandomProblemByDifficulty('Hard'));
-  for (let i = 0; i < expertCount; i++) problems.push(getRandomProblemByDifficulty('Expert'));
+  const problems: (GeneratedProblem | GeometryProblem)[] = [];
+  const generator = genre === 'proportional' ? getRandomProblemByDifficulty : getRandomGeometryProblemByDifficulty;
+
+  for (let i = 0; i < easyCount; i++) problems.push(generator('Easy'));
+  for (let i = 0; i < normalCount; i++) problems.push(generator('Normal'));
+  for (let i = 0; i < hardCount; i++) problems.push(generator('Hard'));
+  for (let i = 0; i < expertCount; i++) problems.push(generator('Expert'));
 
   // シャッフルなし: Easy → Normal → Hard → Expert のグラデーション順
   return problems;
@@ -137,8 +139,8 @@ const MathStudioV2 = () => {
     }
   }, [status, challengeMode, challengeIndex, challengeProblems]);
 
-  const generateProblem = (level: 'Easy' | 'Normal' | 'Hard' | 'Expert' = difficulty) => {
-    const randomProblem = genre === 'proportional'
+  const generateProblem = (level: 'Easy' | 'Normal' | 'Hard' | 'Expert' = difficulty, selectedGenre: 'proportional' | 'geometry' = genre) => {
+    const randomProblem = selectedGenre === 'proportional'
       ? getRandomProblemByDifficulty(level)
       : getRandomGeometryProblemByDifficulty(level);
     setCurrentProblem(randomProblem);
@@ -151,7 +153,7 @@ const MathStudioV2 = () => {
   };
 
   const startChallenge = () => {
-    const problems = generateChallengeProblems(problemCountInput);
+    const problems = generateChallengeProblems(problemCountInput, genre);
     setChallengeProblems(problems);
     setChallengeIndex(0);
     setCurrentProblem(problems[0]);
@@ -240,7 +242,7 @@ const MathStudioV2 = () => {
               onClick={() => {
                 if (challengeMode) return;
                 setGenre('proportional');
-                generateProblem();
+                generateProblem(difficulty, 'proportional');
               }}
               disabled={challengeMode}
               className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${genre === 'proportional'
@@ -254,7 +256,7 @@ const MathStudioV2 = () => {
               onClick={() => {
                 if (challengeMode) return;
                 setGenre('geometry');
-                generateProblem();
+                generateProblem(difficulty, 'geometry');
               }}
               disabled={challengeMode}
               className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${genre === 'geometry'
