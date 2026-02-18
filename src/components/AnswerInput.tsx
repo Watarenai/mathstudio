@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Keyboard, PenTool, Delete, Flame, Type } from 'lucide-react';
 import { Tldraw } from 'tldraw';
 import 'tldraw/tldraw.css';
+import confetti from 'canvas-confetti';
 import { useGameStore } from '../stores/useGameStore';
 
 const AnswerInput: React.FC = () => {
@@ -10,6 +11,19 @@ const AnswerInput: React.FC = () => {
         userAnswer, status, workspaceMode, streak, encouragement, fontSize,
         setUserAnswer, setWorkspaceMode, setFontSize, handleCheck, insertChar, backspace,
     } = useGameStore();
+
+    // 🎉 正解時に紙吹雪
+    useEffect(() => {
+        if (status === 'correct') {
+            const intensity = streak >= 5 ? 0.8 : streak >= 3 ? 0.5 : 0.3;
+            confetti({
+                particleCount: Math.floor(80 * intensity),
+                spread: 60 + streak * 10,
+                origin: { y: 0.7 },
+                colors: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'],
+            });
+        }
+    }, [status, streak]);
 
     const inputTextSize = fontSize === 1 ? 'text-lg md:text-xl' : fontSize === 3 ? 'text-3xl md:text-4xl' : 'text-xl md:text-3xl';
 
