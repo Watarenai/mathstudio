@@ -56,7 +56,7 @@ const SupplementaryAngleDiagram: React.FC<{ text: string }> = ({ text }) => {
             <path d="M 110 100 A 30 30 0 0 0 155 72" fill="none" stroke="#f59e0b" strokeWidth="2" strokeDasharray="4 3" />
             {/* ラベル */}
             <text x="175" y="88" className="text-xs font-bold" fill="#3b82f6">{angle}°</text>
-            <text x="108" y="88" className="text-xs font-bold" fill="#f59e0b">?</text>
+            <text x="100" y="88" className="text-[10px] font-bold" fill="#f59e0b">∠AOC=?</text>
             {/* 点 */}
             <circle cx="140" cy="100" r="4" fill="#334155" />
             <text x="136" y="118" className="text-[10px] font-bold" fill="#334155">O</text>

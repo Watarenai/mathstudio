@@ -8,7 +8,7 @@
             "genre": "geometry"
         },
         "problem": {
-            "text": "直線上の点Aで、∠AOB = 70°のとき、∠BOCは何度ですか。（O, A, B, Cは直線上）",
+            "text": "直線BC上の点Oから半直線OAを引きます。∠AOB = 70°のとき、∠AOCは何度ですか。",
             "correct_answer": "110",
             "answer_variants": [
                 "110°",
@@ -17,7 +17,7 @@
         },
         "hints": [
             "直線上の角度は180°です。",
-            "∠AOB + ∠BOC = 180°",
+            "∠AOB + ∠AOC = 180°",
             "180° - 70° = 110°"
         ],
         "chips": [
