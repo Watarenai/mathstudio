@@ -1,9 +1,10 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lightbulb, Hash, Volume2 } from 'lucide-react';
+import { Lightbulb, Hash, Volume2, Languages } from 'lucide-react';
 import { useGameStore } from '../stores/useGameStore';
 import { DIFFICULTY_CONFIG } from './LeftSidebar';
 import GeometryDiagram from './GeometryDiagram';
+import { parseFurigana } from '../lib/furigana';
 
 const FONT_SIZES = {
     1: { problem: 'text-sm md:text-base', hint: 'text-xs' },
@@ -11,8 +12,27 @@ const FONT_SIZES = {
     3: { problem: 'text-xl md:text-2xl', hint: 'text-base' },
 } as const;
 
+// ふりがな付きテキストレンダラー
+const FuriganaText: React.FC<{ text: string }> = ({ text }) => {
+    const segments = parseFurigana(text);
+    return (
+        <>
+            {segments.map((seg, i) =>
+                seg.ruby ? (
+                    <ruby key={i} className="inline">
+                        {seg.text}
+                        <rp>(</rp><rt className="text-[9px] text-sky-400 font-medium">{seg.ruby}</rt><rp>)</rp>
+                    </ruby>
+                ) : (
+                    <span key={i}>{seg.text}</span>
+                )
+            )}
+        </>
+    );
+};
+
 const ProblemCard: React.FC = () => {
-    const { currentProblem, currentProblemPoints, hintIndex, difficulty, challengeMode, requestHint, speakProblem, fontSize } = useGameStore();
+    const { currentProblem, currentProblemPoints, hintIndex, difficulty, challengeMode, requestHint, speakProblem, fontSize, showFurigana, toggleFurigana } = useGameStore();
 
     if (!currentProblem) return null;
 
@@ -38,13 +58,21 @@ const ProblemCard: React.FC = () => {
                     >
                         <Volume2 size={16} />
                     </button>
+                    {/* ふりがなトグル */}
+                    <button
+                        onClick={toggleFurigana}
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors active:scale-90 ${showFurigana ? 'bg-violet-100 text-violet-600' : 'bg-slate-50 text-slate-400 hover:bg-violet-50 hover:text-violet-500'}`}
+                        title="ふりがな表示"
+                    >
+                        <Languages size={16} />
+                    </button>
                 </div>
                 <div className={`flex items-center gap-2 font-bold text-sm text-slate-300`}>
                     <Hash size={14} /> {currentProblemPoints} pts
                 </div>
             </div>
             <p className={`${fs.problem} font-bold leading-relaxed text-slate-800 mb-4 md:mb-6`}>
-                {currentProblem.problem.text}
+                {showFurigana ? <FuriganaText text={currentProblem.problem.text} /> : currentProblem.problem.text}
             </p>
 
             {/* 図形ダイアグラム */}
@@ -64,7 +92,9 @@ const ProblemCard: React.FC = () => {
                             className={`p-3 bg-amber-50 rounded-xl md:rounded-2xl border border-amber-100 text-amber-800 ${fs.hint} font-medium flex gap-3 shadow-sm`}
                         >
                             <Lightbulb className="shrink-0 text-amber-400" size={18} />
-                            <div>{currentProblem.hints[hintIndex]}</div>
+                            <div>
+                                {showFurigana ? <FuriganaText text={currentProblem.hints[hintIndex]} /> : currentProblem.hints[hintIndex]}
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>

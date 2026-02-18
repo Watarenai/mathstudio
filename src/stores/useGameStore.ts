@@ -98,6 +98,7 @@ interface GameState {
     fontSize: number;  // 1=小, 2=中(default), 3=大
     streak: number;     // 連続正解数
     encouragement: string; // 不正解時の励ましメッセージ
+    showFurigana: boolean; // ふりがな表示
 
     // Actions
     setDifficulty: (d: Difficulty) => void;
@@ -106,6 +107,7 @@ interface GameState {
     setProblemCountInput: (n: number) => void;
     setWorkspaceMode: (m: WorkspaceMode) => void;
     setFontSize: (s: number) => void;
+    toggleFurigana: () => void;
     generateProblem: (level?: Difficulty, selectedGenre?: Genre) => void;
     startChallenge: () => void;
     exitChallenge: () => void;
@@ -141,6 +143,7 @@ export const useGameStore = create<GameState>()(
             fontSize: 2,
             streak: 0,
             encouragement: '',
+            showFurigana: false,
 
             // Simple setters
             setDifficulty: (d) => set({ difficulty: d }),
@@ -149,6 +152,7 @@ export const useGameStore = create<GameState>()(
             setProblemCountInput: (n) => set({ problemCountInput: Math.max(1, Math.min(50, n)) }),
             setWorkspaceMode: (m) => set({ workspaceMode: m }),
             setFontSize: (s) => set({ fontSize: Math.max(1, Math.min(3, s)) }),
+            toggleFurigana: () => set((s) => ({ showFurigana: !s.showFurigana })),
 
             // Generate a new problem
             generateProblem: (level, selectedGenre) => {
@@ -304,6 +308,7 @@ export const useGameStore = create<GameState>()(
                 difficulty: state.difficulty,
                 genre: state.genre,
                 fontSize: state.fontSize,
+                showFurigana: state.showFurigana,
             }),
         }
     )
