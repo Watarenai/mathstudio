@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Lightbulb, Hash, Volume2 } from 'lucide-react';
 import { useGameStore } from '../stores/useGameStore';
 import { DIFFICULTY_CONFIG } from './LeftSidebar';
+import GeometryDiagram from './GeometryDiagram';
 
 const FONT_SIZES = {
     1: { problem: 'text-sm md:text-base', hint: 'text-xs' },
@@ -45,6 +46,13 @@ const ProblemCard: React.FC = () => {
             <p className={`${fs.problem} font-bold leading-relaxed text-slate-800 mb-4 md:mb-6`}>
                 {currentProblem.problem.text}
             </p>
+
+            {/* 図形ダイアグラム */}
+            {'genre' in currentProblem.meta && currentProblem.meta.genre === 'geometry' && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-4 p-3 bg-slate-50 rounded-2xl">
+                    <GeometryDiagram problemId={currentProblem.id} problemText={currentProblem.problem.text} />
+                </motion.div>
+            )}
 
             {/* Hints */}
             <div className="space-y-2 md:space-y-3">
