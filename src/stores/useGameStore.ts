@@ -24,7 +24,41 @@ export type WorkspaceMode = 'input' | 'drawing';
 export type AnswerStatus = 'idle' | 'correct' | 'incorrect';
 
 // ジャンル別の問題取得
+// ============================================
+// ハイブリッド問題プール（JSON + Supabase）
+// ============================================
+import { fetchSupabaseProblems } from '../lib/problemService';
+
+let supabasePool: (GeneratedProblem | GeometryProblem)[] = [];
+let poolLoaded = false;
+
+// 起動時に非同期でSupabase問題を読み込み
+async function loadSupabasePool() {
+    if (poolLoaded) return;
+    try {
+        const problems = await fetchSupabaseProblems();
+        supabasePool = problems;
+        poolLoaded = true;
+        console.log(`[MathStudio] Supabase問題 ${problems.length}件 読み込み完了`);
+    } catch {
+        console.warn('[MathStudio] Supabase問題の読み込みをスキップ');
+    }
+}
+loadSupabasePool();
+
 function getProblemByGenre(genre: Genre, difficulty: Difficulty): GeneratedProblem | GeometryProblem {
+    // Supabaseプールから候補を取得
+    const dbCandidates = supabasePool.filter(p =>
+        p.meta.difficulty === difficulty &&
+        ('genre' in p.meta ? p.meta.genre === genre : true)
+    );
+
+    // DBに候補があれば30%の確率で出題
+    if (dbCandidates.length > 0 && Math.random() < 0.3) {
+        return dbCandidates[Math.floor(Math.random() * dbCandidates.length)];
+    }
+
+    // ローカルJSON問題
     switch (genre) {
         case 'proportional':
             return getRandomProblemByDifficulty(difficulty);

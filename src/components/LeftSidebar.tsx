@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Calculator, Shapes, Sprout, Sword, Flame, Crown, RotateCcw, Play, ArrowDownUp, Variable, Circle, X } from 'lucide-react';
+import { Calculator, Shapes, Sprout, Sword, Flame, Crown, RotateCcw, Play, ArrowDownUp, Variable, Circle, X, PlusCircle } from 'lucide-react';
 import { useGameStore, Difficulty, Genre } from '../stores/useGameStore';
 
 const DIFFICULTY_CONFIG: Record<Difficulty, { color: string; bgColor: string; activeBg: string; textColor: string; icon: any; shadowConfig: string }> = {
@@ -29,9 +29,10 @@ const GENRE_TABS: GenreConfig[] = [
 
 interface LeftSidebarProps {
     onClose?: () => void;
+    onAddProblem?: () => void;
 }
 
-const LeftSidebar: React.FC<LeftSidebarProps> = ({ onClose }) => {
+const LeftSidebar: React.FC<LeftSidebarProps> = ({ onClose, onAddProblem }) => {
     const {
         difficulty, genre, challengeMode, problemCountInput,
         challengeIndex, challengeProblems,
@@ -145,6 +146,14 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onClose }) => {
                 )}
             </div>
 
+            {onAddProblem && (
+                <button
+                    onClick={() => { onAddProblem(); onClose?.(); }}
+                    className="flex items-center justify-center gap-2 py-3 md:py-4 bg-gradient-to-r from-sky-400 to-indigo-500 text-white rounded-2xl font-bold shadow-lg shadow-sky-200 hover:shadow-xl active:scale-95 transition-all"
+                >
+                    <PlusCircle size={18} /> 問題を追加
+                </button>
+            )}
             <button
                 onClick={() => { if (!challengeMode) { generateProblem(); onClose?.(); } }}
                 disabled={challengeMode}

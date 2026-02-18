@@ -5,12 +5,19 @@ import ProblemCard from './components/ProblemCard';
 import AnswerInput from './components/AnswerInput';
 import RightSidebar from './components/RightSidebar';
 import ChallengeOverlay from './components/ChallengeOverlay';
+import ProblemEditor from './components/ProblemEditor';
+import { useAuthStore } from './stores/useAuthStore';
+import { isSupabaseConfigured } from './lib/supabase';
 import { Menu, BarChart3 } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 
 const MathStudioV2 = () => {
   const { currentProblem, status, challengeMode, generateProblem, advanceChallenge } = useGameStore();
+  const { user } = useAuthStore();
   const [leftOpen, setLeftOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const canAddProblems = isSupabaseConfigured && !!user;
 
   // 初回ロード
   useEffect(() => { generateProblem(); }, []);
@@ -47,7 +54,7 @@ const MathStudioV2 = () => {
         lg:relative lg:translate-x-0 lg:z-10
         ${leftOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <LeftSidebar onClose={() => setLeftOpen(false)} />
+        <LeftSidebar onClose={() => setLeftOpen(false)} onAddProblem={canAddProblems ? () => setEditorOpen(true) : undefined} />
       </div>
 
       {/* Main Content */}
@@ -88,6 +95,11 @@ const MathStudioV2 = () => {
       `}>
         <RightSidebar onClose={() => setRightOpen(false)} />
       </div>
+
+      {/* Problem Editor Modal */}
+      <AnimatePresence>
+        {editorOpen && <ProblemEditor onClose={() => setEditorOpen(false)} />}
+      </AnimatePresence>
     </div>
   );
 };
