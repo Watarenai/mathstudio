@@ -4,13 +4,14 @@ import App from './App.tsx'
 import LandingPage from './components/LandingPage.tsx'
 import AuthPage from './components/AuthPage.tsx'
 import { useAuthStore } from './stores/useAuthStore.ts'
+import { isSupabaseConfigured } from './lib/supabase.ts'
 import './index.css'
 
 type Screen = 'landing' | 'auth' | 'app';
 
 const Root = () => {
     const [screen, setScreen] = useState<Screen>('landing');
-    const { user, loading, isConfigured, initialize } = useAuthStore();
+    const { user, loading, initialize } = useAuthStore();
 
     // Supabase セッション復元
     useEffect(() => {
@@ -27,22 +28,16 @@ const Root = () => {
     // ランディングページ
     if (screen === 'landing') {
         return <LandingPage onStart={() => {
-            if (isConfigured) {
-                // Supabase設定済み → 認証画面
-                if (user) {
-                    setScreen('app');
-                } else {
-                    setScreen('auth');
-                }
+            if (isSupabaseConfigured && !user) {
+                setScreen('auth');
             } else {
-                // 未設定 → ゲストモードで直接アプリへ
                 setScreen('app');
             }
         }} />;
     }
 
-    // 認証画面
-    if (screen === 'auth' && !user) {
+    // 認証画面（Supabase設定済み かつ 未ログイン）
+    if (screen === 'auth' && isSupabaseConfigured && !user) {
         return <AuthPage onSkip={() => setScreen('app')} />;
     }
 
