@@ -4,9 +4,10 @@ import { Sparkles, Pencil, BarChart3, Brain, Shapes, ArrowRight, CheckCircle, Us
 
 interface LandingPageProps {
     onStart: () => void;
+    onLogin?: () => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
 
     const features = [
         {
@@ -45,7 +46,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         { value: '即時', label: '解答チェック' },
         { value: '無料', label: 'で始められる' },
     ];
-
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-blue-50/30 font-sans overflow-x-hidden">
 
@@ -58,12 +58,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                         </div>
                         <span className="text-xl font-bold text-slate-800 tracking-tight">MathStudio</span>
                     </div>
-                    <button
-                        onClick={onStart}
-                        className="btn-vibe text-sm !px-5 !py-2.5"
-                    >
-                        無料で始める
-                    </button>
+                    <div className="flex items-center gap-4">
+                        {onLogin && (
+                            <button
+                                onClick={onLogin}
+                                className="text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors"
+                            >
+                                ログイン
+                            </button>
+                        )}
+                        <button
+                            onClick={onStart}
+                            className="btn-vibe text-sm !px-5 !py-2.5"
+                        >
+                            無料で始める
+                        </button>
+                    </div>
                 </div>
             </nav>
 

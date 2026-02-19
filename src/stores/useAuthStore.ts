@@ -8,31 +8,39 @@ interface AuthState {
     user: User | null;
     session: Session | null;
     isPro: boolean;
+    isAdmin: boolean;
     isFamily: boolean;
     planType: PlanType;
     loading: boolean;
     error: string | null;
     isConfigured: boolean;
+    children: any[]; // UserProfile型を本来定義すべき
 
     // Actions
     initialize: () => Promise<void>;
+
     signUp: (email: string, password: string) => Promise<boolean>;
     signIn: (email: string, password: string) => Promise<boolean>;
     signInWithGoogle: () => Promise<void>;
     signOut: () => Promise<void>;
     clearError: () => void;
     checkSubscription: () => Promise<void>; // サブスク状態確認用
+    fetchChildren: () => Promise<void>;
+    createChildAccount: (name: string, password: string, grade: string) => Promise<any>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
     user: null,
     session: null,
     isPro: false,
+    isAdmin: false,
     isFamily: false,
     planType: 'free',
     loading: true,
     error: null,
     isConfigured: isSupabaseConfigured,
+    children: [],
+
 
     initialize: async () => {
         if (!supabase) {
@@ -75,7 +83,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         const { data } = await supabase
             .from('user_profiles')
-            .select('is_pro, plan_type')
+            .select('is_pro, plan_type, is_admin')
             .eq('id', user.id)
             .single();
 
@@ -83,6 +91,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             const plan = (data.plan_type ?? 'free') as PlanType;
             set({
                 isPro: data.is_pro || plan === 'pro' || plan === 'family' || plan === 'school',
+                isAdmin: data.is_admin || false,
                 isFamily: plan === 'family',
                 planType: plan,
             });
@@ -148,8 +157,60 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (!supabase) return;
         set({ loading: true });
         await supabase.auth.signOut();
-        set({ user: null, session: null, isPro: false, isFamily: false, planType: 'free', loading: false });
+        set({ user: null, session: null, isPro: false, isAdmin: false, isFamily: false, planType: 'free', loading: false, children: [] });
     },
 
     clearError: () => set({ error: null }),
+
+    // Family Plan Actions
+
+    fetchChildren: async () => {
+        if (!supabase) return;
+        const { user } = get();
+        if (!user) return;
+
+        try {
+            const { data, error } = await supabase
+                .from('user_profiles')
+                .select('*')
+                .eq('parent_id', user.id);
+
+            if (error) throw error;
+            set({ children: data || [] });
+        } catch (e: any) {
+            console.error('Failed to fetch children:', e);
+            if (e.message?.includes('Invalid token') || e.code === '401' || e.status === 401) {
+                await get().signOut();
+            }
+        }
+    },
+
+    createChildAccount: async (name, _ignoredPassword, grade) => {
+        if (!supabase) return false;
+        set({ loading: true });
+        try {
+            const { data, error } = await supabase.functions.invoke('create-child-account', {
+                body: { childName: name, childGrade: grade }
+            });
+
+            if (error) throw new Error(error.message || 'Function Invoke Error');
+            if (data.error) throw new Error(data.error);
+
+            await get().fetchChildren();
+            set({ loading: false });
+            return data; // { user, credentials: { email, password } }
+        } catch (e: any) {
+            console.error(e);
+            let message = e.message || 'Unknown error';
+
+            // セッション切れ対策
+            if (message.includes('Invalid token') || message.includes('Unauthorized') || (e?.status === 401)) {
+                await get().signOut();
+                message = 'セッションの有効期限が切れました。再度ログインしてください。';
+            }
+
+            set({ loading: false, error: message });
+            return false;
+        }
+    },
 }));

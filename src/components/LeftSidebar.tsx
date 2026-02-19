@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Calculator, Shapes, Sprout, Sword, Flame, Crown, RotateCcw, Play, ArrowDownUp, Variable, Circle, X, PlusCircle, Lock, Users } from 'lucide-react';
+import { Calculator, Shapes, Sprout, Sword, Flame, Crown, RotateCcw, Play, ArrowDownUp, Variable, Circle, X, PlusCircle, Lock, Users, LogOut } from 'lucide-react';
 import { useGameStore, Difficulty, Genre } from '../stores/useGameStore';
 import { useAuthStore } from '../stores/useAuthStore';
 
@@ -44,7 +44,7 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onClose, onAddProblem }) => {
         setPricingModalOpen
     } = useGameStore();
 
-    const { isPro } = useAuthStore();
+    const { isPro, signOut } = useAuthStore();
 
     const handleGenreClick = (key: Genre, requiredPro?: boolean) => {
         if (challengeMode) return;
@@ -89,7 +89,10 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onClose, onAddProblem }) => {
                     Proにアップグレード
                 </button>
             ) : (
-                <div className={`w-full py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-sm border-2 ${useAuthStore.getState().isFamily ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-violet-50 border-violet-100 text-violet-700'}`}>
+                <button
+                    onClick={() => setPricingModalOpen(true)}
+                    className={`w-full py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-sm border-2 transition-all hover:brightness-95 active:scale-[0.98] ${useAuthStore.getState().isFamily ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-violet-50 border-violet-100 text-violet-700'}`}
+                >
                     {useAuthStore.getState().isFamily ? (
                         <>
                             <div className="p-1 bg-emerald-100 rounded-full"><Users size={14} /></div>
@@ -101,7 +104,7 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onClose, onAddProblem }) => {
                             Pro Member
                         </>
                     )}
-                </div>
+                </button>
             )}
 
             {/* Genre tabs */}
@@ -199,13 +202,21 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onClose, onAddProblem }) => {
                     <PlusCircle size={18} /> 問題を追加
                 </button>
             )}
-            <button
-                onClick={() => { if (!challengeMode) { generateProblem(); onClose?.(); } }}
-                disabled={challengeMode}
-                className="mt-auto flex items-center justify-center gap-2 py-3 md:py-4 border-2 border-slate-200 rounded-2xl font-bold text-slate-400 hover:border-sky-400 hover:text-sky-400 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-                <RotateCcw size={18} /> 問題をかえる
-            </button>
+            <div className="mt-auto flex flex-col gap-3">
+                <button
+                    onClick={() => { if (!challengeMode) { generateProblem(); onClose?.(); } }}
+                    disabled={challengeMode}
+                    className="flex items-center justify-center gap-2 py-3 md:py-4 border-2 border-slate-200 rounded-2xl font-bold text-slate-400 hover:border-sky-400 hover:text-sky-400 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <RotateCcw size={18} /> 問題をかえる
+                </button>
+                <button
+                    onClick={() => { signOut(); onClose?.(); }}
+                    className="flex items-center justify-center gap-2 py-3 md:py-4 border-2 border-rose-100 bg-rose-50 text-rose-400 rounded-2xl font-bold hover:bg-rose-100 hover:border-rose-200 transition-all active:scale-95"
+                >
+                    <LogOut size={18} /> ログアウト
+                </button>
+            </div>
         </aside>
     );
 };

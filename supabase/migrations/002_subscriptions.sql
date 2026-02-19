@@ -34,11 +34,11 @@ create trigger on_auth_user_created
     for each row execute procedure public.handle_new_user();
 
 -- 手動でPro化するための関数（デバッグ/管理者用）
-create or replace function public.set_pro_status(user_id uuid, status boolean)
+create or replace function public.set_pro_status(target_user_id uuid, status boolean)
 returns void as $$
 begin
     update public.user_profiles
     set is_pro = status, updated_at = now()
-    where id = user_id;
+    where id = target_user_id;
 end;
 $$ language plpgsql security definer;

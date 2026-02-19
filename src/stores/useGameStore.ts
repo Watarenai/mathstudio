@@ -148,6 +148,17 @@ interface GameState {
     encouragement: string; // 不正解時の励ましメッセージ
     showFurigana: boolean; // ふりがな表示
 
+    // Analytics
+    currentProblemStartTime: number;
+
+    // UI state
+    isPricingModalOpen: boolean;
+    setPricingModalOpen: (open: boolean) => void;
+
+    // Navigation
+    view: 'landing' | 'auth' | 'app' | 'admin';
+    setView: (view: 'landing' | 'auth' | 'app' | 'admin') => void;
+
     // Actions
     setDifficulty: (d: Difficulty) => void;
     setGenre: (g: Genre) => void;
@@ -166,16 +177,15 @@ interface GameState {
     retryProblem: (item: WrongAnswerItem) => void;
     advanceChallenge: () => void;
     speakProblem: () => void;
-    isPricingModalOpen: boolean;
-    setPricingModalOpen: (isOpen: boolean) => void;
 }
 
 export const useGameStore = create<GameState>()(
     persist(
         (set, get) => ({
             // Initial state
-            difficulty: 'Easy',
-            genre: 'proportional',
+            difficulty: 'Normal', // デフォルト難易度
+            genre: 'proportional', // デフォルトジャンル
+            view: 'landing', // 初期画面
             currentProblem: null,
             userAnswer: '',
             hintIndex: -1,
@@ -194,8 +204,11 @@ export const useGameStore = create<GameState>()(
             streak: 0,
             encouragement: '',
             showFurigana: false,
+            currentProblemStartTime: Date.now(),
             isPricingModalOpen: false,
             setPricingModalOpen: (isOpen) => set({ isPricingModalOpen: isOpen }),
+
+            setView: (view) => set({ view }),
 
             // Simple setters
             setDifficulty: (d) => set({ difficulty: d }),
@@ -219,6 +232,7 @@ export const useGameStore = create<GameState>()(
                     status: 'idle',
                     workspaceMode: 'input',
                     currentProblemPoints: 100,
+                    currentProblemStartTime: Date.now(),
                 });
             },
 
@@ -237,6 +251,7 @@ export const useGameStore = create<GameState>()(
                     status: 'idle',
                     workspaceMode: 'input',
                     currentProblemPoints: 100,
+                    currentProblemStartTime: Date.now(),
                 });
             },
 
@@ -264,6 +279,7 @@ export const useGameStore = create<GameState>()(
                         status: 'idle',
                         workspaceMode: 'input',
                         currentProblemPoints: 100,
+                        currentProblemStartTime: Date.now(),
                     });
                 } else {
                     set({ challengeComplete: true });
@@ -294,11 +310,55 @@ export const useGameStore = create<GameState>()(
             },
 
             // Check answer
-            handleCheck: () => {
-                const { currentProblem, userAnswer, currentProblemPoints, challengeMode, challengeIndex, challengeProblems } = get();
+            handleCheck: async () => {
+                const { currentProblem, userAnswer, currentProblemPoints, challengeMode, challengeIndex, challengeProblems, difficulty, genre, currentProblemStartTime } = get();
                 if (!currentProblem) return;
 
                 const isCorrect = checkAnswer(currentProblem, userAnswer);
+                const duration = Date.now() - currentProblemStartTime;
+
+                // Supabaseへのデータ同期（Fire and Forget）
+                // 認証済みユーザーのみ
+                import('../lib/supabase').then(async ({ supabase }) => {
+                    if (!supabase) return;
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) return;
+
+                    // Engagement Analytics Log
+                    supabase.from('problem_logs').insert({
+                        user_id: user.id,
+                        genre: genre,
+                        difficulty: difficulty,
+                        is_correct: isCorrect,
+                        duration_ms: duration,
+                        problem_text: currentProblem.problem.text,
+                        user_answer: userAnswer,
+                    }).then((res) => {
+                        if (res.error) console.error('Log error:', res.error);
+                    });
+
+                    if (isCorrect) {
+                        // 正解ログ (Game Results)
+                        await supabase.from('game_results').insert({
+                            user_id: user.id,
+                            score: Math.max(currentProblemPoints, 10),
+                            genre: genre,
+                            difficulty: difficulty,
+                            correct_count: 1,
+                            total_count: 1,
+                        });
+                    } else {
+                        // 不正解ログ (Wrong Answer Logs)
+                        await supabase.from('wrong_answer_logs').insert({
+                            user_id: user.id,
+                            problem_text: currentProblem.problem.text,
+                            user_answer: userAnswer,
+                            correct_answer: currentProblem.problem.correct_answer,
+                            genre: genre,
+                        });
+                    }
+                }).catch(err => console.error('Failed to sync game result:', err));
+
                 if (isCorrect) {
                     const finalPoints = Math.max(currentProblemPoints, 10);
                     set((s) => ({
@@ -336,6 +396,7 @@ export const useGameStore = create<GameState>()(
                     status: 'idle',
                     currentProblemPoints: 100,
                     wrongAnswers: s.wrongAnswers.filter(w => w.id !== item.id),
+                    currentProblemStartTime: Date.now(),
                 }));
             },
 

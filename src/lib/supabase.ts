@@ -1,4 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
+// TODO: Run `npm run gen-types` to generate `database.types.ts` from your Supabase project,
+// then change this to `createClient<Database>(...)` for strict typing.
+import { Database } from './database.types';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -10,7 +13,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = supabaseUrl && supabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey)
+    ? createClient<Database>(supabaseUrl, supabaseAnonKey)
     : null;
 
 export const isSupabaseConfigured = !!supabase;

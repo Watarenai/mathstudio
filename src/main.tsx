@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import * as Sentry from '@sentry/react'
 import App from './App.tsx'
@@ -6,7 +6,9 @@ import LandingPage from './components/LandingPage.tsx'
 import AuthPage from './components/AuthPage.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { useAuthStore } from './stores/useAuthStore.ts'
+import { useGameStore } from './stores/useGameStore.ts'
 import { isSupabaseConfigured } from './lib/supabase.ts'
+import AdminDashboard from './pages/AdminDashboard.tsx'
 import './index.css'
 
 Sentry.init({
@@ -16,38 +18,55 @@ Sentry.init({
     tracesSampleRate: 0.1,               // 10% のトランザクションをトレース
 })
 
-type Screen = 'landing' | 'auth' | 'app';
+
+// ... (keep imports)
 
 const Root = () => {
-    const [screen, setScreen] = useState<Screen>('landing');
+    const { view, setView } = useGameStore();
     const { user, loading, initialize } = useAuthStore();
+
+    // URL Check for Admin
+    useEffect(() => {
+        if (window.location.pathname === '/admin') {
+            useGameStore.setState({ view: 'admin' });
+        }
+    }, []);
 
     // Supabase セッション復元
     useEffect(() => {
         initialize();
     }, []);
 
-    // ログイン済みならアプリへ直行
+    // ログイン済みならアプリへ直行 (ただし、現在が landing/auth の場合のみ)
     useEffect(() => {
-        if (!loading && user) {
-            setScreen('app');
+        if (!loading && user && (view === 'landing' || view === 'auth')) {
+            setView('app');
         }
-    }, [loading, user]);
+    }, [loading, user, view, setView]);
 
     // ランディングページ
-    if (screen === 'landing') {
-        return <LandingPage onStart={() => {
-            if (isSupabaseConfigured && !user) {
-                setScreen('auth');
-            } else {
-                setScreen('app');
-            }
-        }} />;
+    if (view === 'landing') {
+        return <LandingPage
+            onStart={() => {
+                if (isSupabaseConfigured && !user) {
+                    setView('auth');
+                } else {
+                    setView('app');
+                }
+            }}
+            onLogin={() => setView('auth')}
+        />;
     }
 
     // 認証画面（Supabase設定済み かつ 未ログイン）
-    if (screen === 'auth' && isSupabaseConfigured && !user) {
-        return <AuthPage onSkip={() => setScreen('app')} />;
+    if (view === 'auth' && isSupabaseConfigured && !user) {
+        return <AuthPage onSkip={() => setView('app')} />;
+    }
+
+
+
+    if (view === 'admin') {
+        return <AdminDashboard />;
     }
 
     // メインアプリ

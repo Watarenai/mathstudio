@@ -7,7 +7,7 @@ interface AuthPageProps {
     onSkip: () => void;
 }
 
-const AuthPage: React.FC<AuthPageProps> = ({ onSkip }) => {
+const AuthPage: React.FC<AuthPageProps> = ({ onSkip: _onSkip }) => {
     const { signIn, signUp, signInWithGoogle, loading, error, clearError } = useAuthStore();
     const [mode, setMode] = useState<'signin' | 'signup'>('signin');
     const [email, setEmail] = useState('');
@@ -34,9 +34,32 @@ const AuthPage: React.FC<AuthPageProps> = ({ onSkip }) => {
         setSignUpSuccess(false);
     };
 
+    const handleDevLogin = async (email: string, pass: string) => {
+        if (await signIn(email, pass)) return;
+
+        // Try signup if login failed
+        if (await signUp(email, pass)) {
+            // Check if session is established (email might need confirmation)
+            if (!useAuthStore.getState().session) {
+                alert(`確認メールを ${email} に送信しました。リンクをクリックして認証してください。`);
+            }
+            return;
+        }
+
+        // If we are here, both failed.
+        const err = useAuthStore.getState().error;
+        console.log('Dev Login Failed:', err);
+
+        if (err && (err.includes('registered') || err.includes('登録'))) {
+            alert(`アカウント(${email})は既に存在しますが、パスワードが違います。\nSupabaseのAuthentication画面でユーザーを削除するか、別のメールを使用してください。`);
+        } else {
+            alert(`ログインエラー: ${err}`);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-blue-50/30 flex items-center justify-center p-4">
-            {/* Background decoration */}
+            {/* ... (background and logo remain same) */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-20 left-10 w-72 h-72 bg-blue-100/40 rounded-full blur-3xl" />
                 <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-100/30 rounded-full blur-3xl" />
@@ -177,6 +200,23 @@ const AuthPage: React.FC<AuthPageProps> = ({ onSkip }) => {
                     </div>
                 )}
 
+                {/* DEV ONLY: Quick Login */}
+                {import.meta.env.DEV && (
+                    <div className="flex flex-col gap-2 mt-6">
+                        <button
+                            onClick={() => handleDevLogin('w@gmail.com', 'nana9999')}
+                            className="text-xs bg-amber-100 text-amber-700 py-2 rounded-lg font-bold hover:bg-amber-200 transition-colors"
+                        >
+                            ⚡ 開発用 (w@gmail.com)
+                        </button>
+                        <button
+                            onClick={() => handleDevLogin('a@gmail.com', 'nananana')}
+                            className="text-xs bg-amber-100 text-amber-700 py-2 rounded-lg font-bold hover:bg-amber-200 transition-colors"
+                        >
+                            ⚡ 開発用 (a@gmail.com)
+                        </button>
+                    </div>
+                )}
                 {/* Guest & Dev Login */}
                 <div className="mt-6 flex flex-col gap-3">
                     <button
@@ -191,15 +231,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ onSkip }) => {
                         <UserPlus size={16} /> ゲストアカウントで始める（メアド不要）
                     </button>
 
-                    {/* DEV ONLY: Quick Login */}
-                    {import.meta.env.DEV && (
-                        <button
-                            onClick={() => signIn('w@gmail.com', 'nana9999')}
-                            className="text-xs bg-amber-100 text-amber-700 py-2 rounded-lg font-bold hover:bg-amber-200 transition-colors"
-                        >
-                            ⚡ 開発用クイックログイン (w@gmail.com)
-                        </button>
-                    )}
                 </div>
             </motion.div>
         </div>
