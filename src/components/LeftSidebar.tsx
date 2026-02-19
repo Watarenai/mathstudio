@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Calculator, Shapes, Sprout, Sword, Flame, Crown, RotateCcw, Play, ArrowDownUp, Variable, Circle, X, PlusCircle } from 'lucide-react';
+import { Calculator, Shapes, Sprout, Sword, Flame, Crown, RotateCcw, Play, ArrowDownUp, Variable, Circle, X, PlusCircle, Lock, Users } from 'lucide-react';
 import { useGameStore, Difficulty, Genre } from '../stores/useGameStore';
+import { useAuthStore } from '../stores/useAuthStore';
 
 const DIFFICULTY_CONFIG: Record<Difficulty, { color: string; bgColor: string; activeBg: string; textColor: string; icon: any; shadowConfig: string }> = {
     Easy: { color: 'emerald', bgColor: 'bg-emerald-50', activeBg: 'bg-emerald-500', textColor: 'text-emerald-600', icon: Sprout, shadowConfig: 'shadow-emerald-200' },
@@ -17,13 +18,14 @@ interface GenreConfig {
     label: string;
     icon: any;
     activeClass: string;
+    isPro?: boolean;
 }
 
 const GENRE_TABS: GenreConfig[] = [
     { key: 'proportional', label: '比例', icon: Calculator, activeClass: 'bg-indigo-500 text-white shadow-lg shadow-indigo-200' },
     { key: 'inverse', label: '反比例', icon: ArrowDownUp, activeClass: 'bg-purple-500 text-white shadow-lg shadow-purple-200' },
     { key: 'equation', label: '方程式', icon: Variable, activeClass: 'bg-rose-500 text-white shadow-lg shadow-rose-200' },
-    { key: 'linear', label: '一次関数', icon: ArrowDownUp, activeClass: 'bg-fuchsia-500 text-white shadow-lg shadow-fuchsia-200' },
+    { key: 'linear', label: '一次関数', icon: ArrowDownUp, activeClass: 'bg-fuchsia-500 text-white shadow-lg shadow-fuchsia-200', isPro: true },
     { key: 'geometry', label: '図形', icon: Shapes, activeClass: 'bg-teal-500 text-white shadow-lg shadow-teal-200' },
     { key: 'sector', label: 'おうぎ形', icon: Circle, activeClass: 'bg-cyan-500 text-white shadow-lg shadow-cyan-200' },
 ];
@@ -39,10 +41,17 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onClose, onAddProblem }) => {
         challengeIndex, challengeProblems,
         setDifficulty, setGenre, generateProblem,
         setProblemCountInput, startChallenge, exitChallenge,
+        setPricingModalOpen
     } = useGameStore();
 
-    const handleGenreClick = (key: Genre) => {
+    const { isPro } = useAuthStore();
+
+    const handleGenreClick = (key: Genre, requiredPro?: boolean) => {
         if (challengeMode) return;
+        if (requiredPro && !isPro) {
+            setPricingModalOpen(true);
+            return;
+        }
         setGenre(key);
         generateProblem(difficulty, key);
         onClose?.();
@@ -50,6 +59,10 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onClose, onAddProblem }) => {
 
     const handleDifficultyClick = (lvl: Difficulty) => {
         if (challengeMode) return;
+        if (lvl === 'Expert' && !isPro) {
+            setPricingModalOpen(true);
+            return;
+        }
         setDifficulty(lvl);
         generateProblem(lvl);
         onClose?.();
@@ -66,6 +79,31 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onClose, onAddProblem }) => {
                 </div>
             )}
 
+            {/* Pro/Family Badge or Upgrade Button */}
+            {!isPro ? (
+                <button
+                    onClick={() => setPricingModalOpen(true)}
+                    className="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-violet-200 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0"
+                >
+                    <Crown size={18} fill="currentColor" className="text-yellow-300" />
+                    Proにアップグレード
+                </button>
+            ) : (
+                <div className={`w-full py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-sm border-2 ${useAuthStore.getState().isFamily ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-violet-50 border-violet-100 text-violet-700'}`}>
+                    {useAuthStore.getState().isFamily ? (
+                        <>
+                            <div className="p-1 bg-emerald-100 rounded-full"><Users size={14} /></div>
+                            Family Plan
+                        </>
+                    ) : (
+                        <>
+                            <Crown size={18} fill="currentColor" className="text-yellow-400" />
+                            Pro Member
+                        </>
+                    )}
+                </div>
+            )}
+
             {/* Genre tabs */}
             <div>
                 <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Genre</h2>
@@ -73,14 +111,15 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onClose, onAddProblem }) => {
                     {GENRE_TABS.map((tab) => {
                         const Icon = tab.icon;
                         const isActive = genre === tab.key;
+                        const isLocked = tab.isPro && !isPro;
                         return (
                             <button
                                 key={tab.key}
-                                onClick={() => handleGenreClick(tab.key)}
+                                onClick={() => handleGenreClick(tab.key, tab.isPro)}
                                 disabled={challengeMode}
                                 className={`py-2.5 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${isActive ? tab.activeClass : 'bg-slate-100 text-slate-500 hover:bg-slate-200'} ${challengeMode ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                                <Icon size={14} />
+                                {isLocked ? <Lock size={14} /> : <Icon size={14} />}
                                 {tab.label}
                             </button>
                         );
@@ -96,6 +135,8 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onClose, onAddProblem }) => {
                         const theme = DIFFICULTY_CONFIG[lvl];
                         const Icon = theme.icon;
                         const isActive = !challengeMode && difficulty === lvl;
+                        const isLocked = lvl === 'Expert' && !isPro;
+
                         return (
                             <button
                                 key={lvl}
@@ -103,9 +144,12 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ onClose, onAddProblem }) => {
                                 disabled={challengeMode}
                                 className={`w-full py-3 md:py-4 px-5 md:px-6 rounded-2xl font-bold text-left transition-all relative overflow-hidden group flex items-center gap-3 ${isActive ? `${theme.activeBg} text-white shadow-lg ${theme.shadowConfig}` : `${theme.bgColor} ${theme.textColor} hover:brightness-95`} ${challengeMode ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                                <Icon size={20} className={isActive ? 'text-white' : theme.textColor} />
-                                <span>{lvl}</span>
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isActive ? 'bg-white/20' : theme.bgColor} ${isLocked ? 'grayscale opacity-70' : ''}`}>
+                                    <Icon size={20} className={isActive ? 'text-white' : theme.textColor} />
+                                </div>
+                                <span className={isLocked ? 'text-slate-400' : ''}>{lvl}</span>
                                 {isActive && <motion.div layoutId="active" className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full" />}
+                                {isLocked && !isActive && <Lock size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300" />}
                             </button>
                         );
                     })}

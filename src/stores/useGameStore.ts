@@ -166,6 +166,8 @@ interface GameState {
     retryProblem: (item: WrongAnswerItem) => void;
     advanceChallenge: () => void;
     speakProblem: () => void;
+    isPricingModalOpen: boolean;
+    setPricingModalOpen: (isOpen: boolean) => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -192,6 +194,8 @@ export const useGameStore = create<GameState>()(
             streak: 0,
             encouragement: '',
             showFurigana: false,
+            isPricingModalOpen: false,
+            setPricingModalOpen: (isOpen) => set({ isPricingModalOpen: isOpen }),
 
             // Simple setters
             setDifficulty: (d) => set({ difficulty: d }),
@@ -357,6 +361,10 @@ export const useGameStore = create<GameState>()(
                 genre: state.genre,
                 fontSize: state.fontSize,
                 showFurigana: state.showFurigana,
+                challengeProblems: state.challengeProblems,
+                challengeIndex: state.challengeIndex,
+                challengeMode: state.challengeMode,
+                challengeComplete: state.challengeComplete,
             }),
         }
     )

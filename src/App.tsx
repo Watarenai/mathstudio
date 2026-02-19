@@ -6,18 +6,21 @@ import AnswerInput from './components/AnswerInput';
 import RightSidebar from './components/RightSidebar';
 import ChallengeOverlay from './components/ChallengeOverlay';
 import ProblemEditor from './components/ProblemEditor';
+import PricingModal from './components/PricingModal';
+import ParentDashboard from './components/ParentDashboard';
 import ReloadPrompt from './components/ReloadPrompt';
 import { useAuthStore } from './stores/useAuthStore';
 import { isSupabaseConfigured } from './lib/supabase';
-import { Menu, BarChart3 } from 'lucide-react';
+import { Menu, BarChart3, Users } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 
 const MathStudioV2 = () => {
-  const { currentProblem, status, challengeMode, generateProblem, advanceChallenge } = useGameStore();
-  const { user } = useAuthStore();
+  const { currentProblem, status, challengeMode, generateProblem, advanceChallenge, isPricingModalOpen, setPricingModalOpen } = useGameStore();
+  const { user, isFamily } = useAuthStore();
   const [leftOpen, setLeftOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
   const canAddProblems = isSupabaseConfigured && !!user;
 
   // 初回ロード
@@ -36,6 +39,19 @@ const MathStudioV2 = () => {
       return () => clearTimeout(timer);
     }
   }, [status, challengeMode]);
+
+  // 決済完了時の処理
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success') === 'true') {
+      // URLパラメータをクリア
+      window.history.replaceState({}, '', window.location.pathname);
+      // 成功メッセージ（簡易）
+      alert('プランへのアップグレードありがとうございます！✨\nすべての機能が解放されました。');
+      // ユーザー情報を再取得（isPro / isFamily 更新のため）
+      useAuthStore.getState().checkSubscription();
+    }
+  }, []);
 
   if (!currentProblem) return null;
 
@@ -80,6 +96,19 @@ const MathStudioV2 = () => {
           </button>
         </div>
 
+        {/* 保護者ダッシュボードボタン（ファミリープランのみ表示） */}
+        {isFamily && (
+          <div className="w-full max-w-2xl z-20 mb-2">
+            <button
+              onClick={() => setDashboardOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-sm font-bold hover:bg-emerald-100 transition-colors"
+            >
+              <Users size={16} />
+              保護者ダッシュボードを開く
+            </button>
+          </div>
+        )}
+
         <ChallengeOverlay />
 
         <div className="w-full max-w-2xl z-10 space-y-4 md:space-y-6 flex flex-col flex-1 min-h-0">
@@ -101,6 +130,15 @@ const MathStudioV2 = () => {
       <AnimatePresence>
         {editorOpen && <ProblemEditor onClose={() => setEditorOpen(false)} />}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {isPricingModalOpen && (
+          <PricingModal onClose={() => setPricingModalOpen(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* 保護者ダッシュボード */}
+      {dashboardOpen && <ParentDashboard onClose={() => setDashboardOpen(false)} />}
 
       <ReloadPrompt />
     </div>

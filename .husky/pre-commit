@@ -1,0 +1,7 @@
+# .envの誤コミット防止
+if git diff --cached --name-only | grep -q "^\.env$"; then
+  echo "ERROR: .env file is staged. Remove it with: git restore --staged .env"
+  exit 1
+fi
+
+npx lint-staged

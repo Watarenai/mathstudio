@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
+import * as Sentry from '@sentry/react'
 import App from './App.tsx'
 import LandingPage from './components/LandingPage.tsx'
 import AuthPage from './components/AuthPage.tsx'
+import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { useAuthStore } from './stores/useAuthStore.ts'
 import { isSupabaseConfigured } from './lib/supabase.ts'
 import './index.css'
+
+Sentry.init({
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    environment: import.meta.env.MODE,   // 'development' or 'production'
+    enabled: import.meta.env.PROD,       // 本番環境のみ送信
+    tracesSampleRate: 0.1,               // 10% のトランザクションをトレース
+})
 
 type Screen = 'landing' | 'auth' | 'app';
 
@@ -47,6 +56,8 @@ const Root = () => {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-        <Root />
+        <ErrorBoundary>
+            <Root />
+        </ErrorBoundary>
     </React.StrictMode>,
 )
