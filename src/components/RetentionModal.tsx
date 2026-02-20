@@ -25,11 +25,10 @@ export const RetentionModal: React.FC<RetentionModalProps> = ({ onClose, onConfi
     const handleReasonSelect = (reasonId: string) => {
         setSelectedReason(reasonId);
         if (supabase && user) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (supabase as any)
+            supabase
                 .from('cancellation_feedback')
                 .insert({ user_id: user.id, reason: reasonId })
-                .then(); // fire-and-forget（migration 013_cancellation_feedback.sql 実行後に型を再生成すること）
+                .then();
         }
     };
 
