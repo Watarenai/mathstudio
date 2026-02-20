@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import * as Sentry from '@sentry/react'
 import App from './App.tsx'
@@ -7,8 +7,9 @@ import AuthPage from './components/AuthPage.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { useAuthStore } from './stores/useAuthStore.ts'
 import { useGameStore } from './stores/useGameStore.ts'
-import AdminDashboard from './pages/AdminDashboard.tsx'
 import './index.css'
+
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard.tsx'))
 
 Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,
@@ -63,7 +64,7 @@ const Root = () => {
 
 
     if (view === 'admin') {
-        return <AdminDashboard />;
+        return <Suspense fallback={null}><AdminDashboard /></Suspense>;
     }
 
     // メインアプリ
