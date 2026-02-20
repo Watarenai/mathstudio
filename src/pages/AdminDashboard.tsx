@@ -1,14 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import type { Database } from '../lib/database.types';
+
+type UserProfile = Database['public']['Tables']['user_profiles']['Row'];
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../stores/useAuthStore';
-import { Search, Shield, User, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Search, Shield, User, CheckCircle, XCircle, AlertTriangle, TrendingDown } from 'lucide-react';
+
+const REASON_LABELS: Record<string, string> = {
+    expensive: '料金が高い',
+    not_using: '使っていない',
+    features: '機能が足りない',
+    bugs: '不具合が多い',
+    other: 'その他',
+};
+const REASON_COLORS: Record<string, string> = {
+    expensive: '#f43f5e',
+    not_using: '#f97316',
+    features: '#eab308',
+    bugs: '#8b5cf6',
+    other: '#64748b',
+};
 
 const AdminDashboard: React.FC = () => {
     const { isAdmin, user: currentUser, loading: authLoading } = useAuthStore();
     const [email, setEmail] = useState('');
-    const [searchResult, setSearchResult] = useState<any>(null);
+    const [searchResult, setSearchResult] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
+    const [churnData, setChurnData] = useState<{ reason: string; count: number }[]>([]);
+    const [churnLoading, setChurnLoading] = useState(true);
+
+    useEffect(() => {
+        if (!supabase || !isAdmin) return;
+        supabase
+            .from('cancellation_feedback')
+            .select('reason')
+            .then(({ data }) => {
+                if (data) {
+                    const counts: Record<string, number> = {};
+                    data.forEach(row => {
+                        counts[row.reason] = (counts[row.reason] ?? 0) + 1;
+                    });
+                    const sorted = Object.entries(counts)
+                        .map(([reason, count]) => ({ reason, count }))
+                        .sort((a, b) => b.count - a.count);
+                    setChurnData(sorted);
+                }
+                setChurnLoading(false);
+            });
+    }, [isAdmin]);
 
     if (authLoading) {
         return (
@@ -80,14 +121,14 @@ const AdminDashboard: React.FC = () => {
                         .eq('id', email)
                         .single();
                     if (errorId) throw errorId;
-                    setSearchResult(dataId);
+                    setSearchResult(dataId as UserProfile);
                     return;
                 }
                 throw error;
             }
-            setSearchResult(data);
-        } catch (err: any) {
-            setMessage(`User not found: ${err.message}`);
+            setSearchResult(data as UserProfile);
+        } catch (err: unknown) {
+            setMessage(`User not found: ${err instanceof Error ? err.message : String(err)}`);
         } finally {
             setLoading(false);
         }
@@ -107,8 +148,8 @@ const AdminDashboard: React.FC = () => {
 
             setSearchResult({ ...searchResult, is_pro: newStatus });
             setMessage(`Success: Changed to ${newStatus ? 'Pro' : 'Free'}`);
-        } catch (err: any) {
-            setMessage(`Error: ${err.message}`);
+        } catch (err: unknown) {
+            setMessage(`Error: ${err instanceof Error ? err.message : String(err)}`);
         } finally {
             setLoading(false);
         }
@@ -130,6 +171,43 @@ const AdminDashboard: React.FC = () => {
                 </header>
 
                 <div className="grid gap-6">
+                    {/* Churn Feedback Card */}
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
+                            <TrendingDown size={20} className="text-rose-500" /> 解約理由
+                            <span className="ml-auto text-sm font-normal text-slate-400">
+                                {churnLoading ? '読み込み中...' : `${churnData.reduce((s, d) => s + d.count, 0)} 件`}
+                            </span>
+                        </h2>
+                        {churnLoading ? (
+                            <div className="h-48 flex items-center justify-center text-slate-400 text-sm">読み込み中...</div>
+                        ) : churnData.length === 0 ? (
+                            <div className="h-48 flex items-center justify-center text-slate-400 text-sm">データなし</div>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={200}>
+                                <BarChart data={churnData} layout="vertical" margin={{ left: 16 }}>
+                                    <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
+                                    <YAxis
+                                        type="category"
+                                        dataKey="reason"
+                                        width={100}
+                                        tick={{ fontSize: 12 }}
+                                        tickFormatter={r => REASON_LABELS[r] ?? r}
+                                    />
+                                    <Tooltip
+                                        formatter={(v: number | undefined) => [`${v ?? 0} 件`, '件数']}
+                                        labelFormatter={(r: unknown) => REASON_LABELS[String(r)] ?? String(r)}
+                                    />
+                                    <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                                        {churnData.map(d => (
+                                            <Cell key={d.reason} fill={REASON_COLORS[d.reason] ?? '#94a3b8'} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+
                     {/* Search Card */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                         <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
