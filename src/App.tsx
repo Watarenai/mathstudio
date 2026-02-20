@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useGameStore } from './stores/useGameStore';
 import LeftSidebar from './components/LeftSidebar';
 import ProblemCard from './components/ProblemCard';
 import AnswerInput from './components/AnswerInput';
 import RightSidebar from './components/RightSidebar';
 import ChallengeOverlay from './components/ChallengeOverlay';
-import ProblemEditor from './components/ProblemEditor';
-import PricingModal from './components/PricingModal';
-import ParentDashboard from './components/ParentDashboard';
 import ReloadPrompt from './components/ReloadPrompt';
+
+const ProblemEditor = lazy(() => import('./components/ProblemEditor'));
+const PricingModal = lazy(() => import('./components/PricingModal'));
+const ParentDashboard = lazy(() => import('./components/ParentDashboard'));
 import { useAuthStore } from './stores/useAuthStore';
 import { isSupabaseConfigured } from './lib/supabase';
 import { Menu, BarChart3, Users } from 'lucide-react';
@@ -24,9 +25,10 @@ const MathStudioV2 = () => {
   const canAddProblems = isSupabaseConfigured && !!user;
 
   // 初回ロード
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { generateProblem(); }, []);
 
-  // 正解後の自動進行
+  // 正解後の自動進行（advanceChallenge/generateProblemはZustandの安定参照のため依存配列から省略）
   useEffect(() => {
     if (status === 'correct') {
       const timer = window.setTimeout(() => {
@@ -38,6 +40,7 @@ const MathStudioV2 = () => {
       }, 2000);
       return () => clearTimeout(timer);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, challengeMode]);
 
   // 決済完了時の処理
@@ -127,18 +130,24 @@ const MathStudioV2 = () => {
       </div>
 
       {/* Problem Editor Modal */}
-      <AnimatePresence>
-        {editorOpen && <ProblemEditor onClose={() => setEditorOpen(false)} />}
-      </AnimatePresence>
+      <Suspense fallback={null}>
+        <AnimatePresence>
+          {editorOpen && <ProblemEditor onClose={() => setEditorOpen(false)} />}
+        </AnimatePresence>
+      </Suspense>
 
-      <AnimatePresence>
-        {isPricingModalOpen && (
-          <PricingModal onClose={() => setPricingModalOpen(false)} />
-        )}
-      </AnimatePresence>
+      <Suspense fallback={null}>
+        <AnimatePresence>
+          {isPricingModalOpen && (
+            <PricingModal onClose={() => setPricingModalOpen(false)} />
+          )}
+        </AnimatePresence>
+      </Suspense>
 
       {/* 保護者ダッシュボード */}
-      {dashboardOpen && <ParentDashboard onClose={() => setDashboardOpen(false)} />}
+      <Suspense fallback={null}>
+        {dashboardOpen && <ParentDashboard onClose={() => setDashboardOpen(false)} />}
+      </Suspense>
 
       <ReloadPrompt />
     </div>

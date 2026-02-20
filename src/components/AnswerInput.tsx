@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Keyboard, PenTool, Delete, Flame, Type } from 'lucide-react';
-import { Tldraw } from 'tldraw';
-import 'tldraw/tldraw.css';
 import confetti from 'canvas-confetti';
+
+const TldrawPanel = lazy(() => import('./TldrawPanel'));
 import { useGameStore } from '../stores/useGameStore';
 
 const AnswerInput: React.FC = () => {
@@ -146,9 +146,15 @@ const AnswerInput: React.FC = () => {
                         </div>
                     </div>
                 ) : (
-                    <div className="h-full w-full relative bg-white">
-                        <Tldraw persistenceKey="mathbudy-scratchpad" hideUi={false} />
-                    </div>
+                    <Suspense fallback={
+                        <div className="h-full bg-white rounded-[24px] flex items-center justify-center text-slate-400 text-sm">
+                            読み込み中...
+                        </div>
+                    }>
+                        <div className="h-full w-full relative bg-white">
+                            <TldrawPanel />
+                        </div>
+                    </Suspense>
                 )}
             </div>
         </>
