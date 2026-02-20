@@ -7,7 +7,6 @@ import AuthPage from './components/AuthPage.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { useAuthStore } from './stores/useAuthStore.ts'
 import { useGameStore } from './stores/useGameStore.ts'
-import { isSupabaseConfigured } from './lib/supabase.ts'
 import AdminDashboard from './pages/AdminDashboard.tsx'
 import './index.css'
 
@@ -19,8 +18,7 @@ Sentry.init({
 })
 
 
-// ... (keep imports)
-
+// eslint-disable-next-line react-refresh/only-export-components
 const Root = () => {
     const { view, setView } = useGameStore();
     const { user, loading, initialize } = useAuthStore();
@@ -35,6 +33,7 @@ const Root = () => {
     // Supabase セッション復元
     useEffect(() => {
         initialize();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // ログイン済みならアプリへ直行 (ただし、現在が landing/auth の場合のみ)
@@ -48,18 +47,16 @@ const Root = () => {
     if (view === 'landing') {
         return <LandingPage
             onStart={() => {
-                if (isSupabaseConfigured && !user) {
-                    setView('auth');
-                } else {
-                    setView('app');
-                }
+                // ログイン済みならアプリへ、未ログインなら必ず認証画面へ
+                // (isSupabaseConfigured は関係なく、ログイン状態のみで判断)
+                user ? setView('app') : setView('auth');
             }}
             onLogin={() => setView('auth')}
         />;
     }
 
-    // 認証画面（Supabase設定済み かつ 未ログイン）
-    if (view === 'auth' && isSupabaseConfigured && !user) {
+    // 認証画面（未ログインの場合は常に表示。Supabase未設定時はスキップ可能）
+    if (view === 'auth' && !user) {
         return <AuthPage onSkip={() => setView('app')} />;
     }
 
