@@ -1,6 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-// TODO: Run `npm run gen-types` to generate `database.types.ts` from your Supabase project,
-// then change this to `createClient<Database>(...)` for strict typing.
 import { Database } from './database.types';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;

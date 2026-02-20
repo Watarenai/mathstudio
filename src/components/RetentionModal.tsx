@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle, X, HeartHandshake } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useAuthStore } from '../stores/useAuthStore';
 
 interface RetentionModalProps {
     onClose: () => void;
@@ -18,10 +20,17 @@ const REASONS = [
 export const RetentionModal: React.FC<RetentionModalProps> = ({ onClose, onConfirm }) => {
     const [step, setStep] = useState<'reason' | 'confirm'>('reason');
     const [selectedReason, setSelectedReason] = useState<string | null>(null);
+    const { user } = useAuthStore();
 
     const handleReasonSelect = (reasonId: string) => {
         setSelectedReason(reasonId);
-        // ここで将来的に理由をログ送信する処理を入れる
+        if (supabase && user) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (supabase as any)
+                .from('cancellation_feedback')
+                .insert({ user_id: user.id, reason: reasonId })
+                .then(); // fire-and-forget（migration 013_cancellation_feedback.sql 実行後に型を再生成すること）
+        }
     };
 
     return (

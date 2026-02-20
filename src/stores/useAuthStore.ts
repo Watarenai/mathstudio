@@ -1,8 +1,10 @@
 import { create } from 'zustand';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
+import type { Database } from '../lib/database.types';
 
 export type PlanType = 'free' | 'pro' | 'family' | 'school';
+export type ChildProfile = Database['public']['Tables']['user_profiles']['Row'];
 
 interface AuthState {
     user: User | null;
@@ -14,7 +16,7 @@ interface AuthState {
     loading: boolean;
     error: string | null;
     isConfigured: boolean;
-    children: any[]; // UserProfile型を本来定義すべき
+    children: ChildProfile[];
 
     // Actions
     initialize: () => Promise<void>;
@@ -26,7 +28,7 @@ interface AuthState {
     clearError: () => void;
     checkSubscription: () => Promise<void>; // サブスク状態確認用
     fetchChildren: () => Promise<void>;
-    createChildAccount: (name: string, password: string, grade: string) => Promise<any>;
+    createChildAccount: (name: string, password: string, grade: string) => Promise<{ user: ChildProfile; credentials: { email: string; password: string } } | false>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -148,8 +150,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 }
             });
             if (error) throw error;
-        } catch (e: any) {
-            set({ loading: false, error: e.message || 'Google認証に失敗しました' });
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : 'Google認証に失敗しました';
+            set({ loading: false, error: msg });
         }
     },
 
@@ -176,10 +179,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 .eq('parent_id', user.id);
 
             if (error) throw error;
-            set({ children: data || [] });
-        } catch (e: any) {
+            set({ children: (data || []) as ChildProfile[] });
+        } catch (e) {
             console.error('Failed to fetch children:', e);
-            if (e.message?.includes('Invalid token') || e.code === '401' || e.status === 401) {
+            const err = e as { message?: string; code?: string; status?: number };
+            if (err.message?.includes('Invalid token') || err.code === '401' || err.status === 401) {
                 await get().signOut();
             }
         }
@@ -199,12 +203,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             await get().fetchChildren();
             set({ loading: false });
             return data; // { user, credentials: { email, password } }
-        } catch (e: any) {
+        } catch (e) {
             console.error(e);
-            let message = e.message || 'Unknown error';
+            const err = e as { message?: string; status?: number };
+            let message = err.message || 'Unknown error';
 
             // セッション切れ対策
-            if (message.includes('Invalid token') || message.includes('Unauthorized') || (e?.status === 401)) {
+            if (message.includes('Invalid token') || message.includes('Unauthorized') || err.status === 401) {
                 await get().signOut();
                 message = 'セッションの有効期限が切れました。再度ログインしてください。';
             }
