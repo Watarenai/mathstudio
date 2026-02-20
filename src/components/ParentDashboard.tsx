@@ -72,8 +72,20 @@ const ParentDashboard: React.FC<ParentDashboardProps> = ({ onClose }) => {
                     .order('created_at', { ascending: false })
                     .limit(20);
 
-                setGameResults(results || []);
-                setWrongLogs(wrongs || []);
+                setGameResults((results || []).map(r => ({
+                    id: r.id,
+                    score: r.score,
+                    created_at: r.created_at || new Date().toISOString(),
+                    genre: r.genre || 'unknown',
+                })));
+                setWrongLogs((wrongs || []).map(w => ({
+                    id: w.id,
+                    problem_text: w.problem_text || '',
+                    user_answer: w.user_answer || '',
+                    correct_answer: w.correct_answer || '',
+                    genre: w.genre || 'unknown',
+                    created_at: w.created_at || new Date().toISOString(),
+                })));
             } catch (error) {
                 console.error('Data fetch error:', error);
             } finally {

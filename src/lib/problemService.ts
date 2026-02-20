@@ -19,11 +19,11 @@ interface SupabaseProblemRow {
     points: number;
     problem_text: string;
     correct_answer: string;
-    answer_variants: string[];
-    hints: string[];
-    chips: string[];
+    answer_variants: string[] | null;
+    hints: string[] | null;
+    chips: string[] | null;
     is_approved: boolean;
-    created_by: string;
+    created_by: string | null;
 }
 
 function rowToProblem(row: SupabaseProblemRow): AnyProblem {
@@ -37,10 +37,10 @@ function rowToProblem(row: SupabaseProblemRow): AnyProblem {
         problem: {
             text: row.problem_text,
             correct_answer: row.correct_answer,
-            answer_variants: row.answer_variants || [],
+            answer_variants: row.answer_variants ?? [],
         },
-        hints: row.hints || [],
-        chips: row.chips || [],
+        hints: row.hints ?? [],
+        chips: row.chips ?? [],
     };
 
     if (row.genre === 'geometry' || row.genre === 'sector') {
