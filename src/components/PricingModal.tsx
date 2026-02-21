@@ -15,7 +15,7 @@ const PLANS = [
         id: 'pro' as const,
         label: 'Pro プラン',
         price: '¥980',
-        priceId: 'price_1T2D2pHsEQGHlcT0Vtk4yfEI',
+        priceId: 'price_1T35QfH3R2LaFbghPNWm6eae',
         badge: 'おすすめ',
         badgeColor: 'from-amber-400 to-orange-500',
         color: 'from-violet-600 to-indigo-600',
@@ -33,7 +33,7 @@ const PLANS = [
         id: 'family' as const,
         label: 'ファミリープラン',
         price: '¥1,480',
-        priceId: 'price_1T2QDlHsEQGHlcT0YLzNMkSh',
+        priceId: 'price_1T35RIH3R2LaFbgh3uaMUDiS',
         badge: '保護者向け',
         badgeColor: 'from-emerald-400 to-teal-500',
         color: 'from-emerald-500 to-teal-600',
@@ -82,7 +82,8 @@ const PricingModal: React.FC<PricingModalProps> = ({ onClose }) => {
                 // Edge Function の詳細エラーを取得
                 let detail = error.message;
                 try {
-                    const body = await (error as any).context?.json?.();
+                    const errObj = error as { context?: { json?: () => Promise<{ error?: string }> } };
+                    const body = await errObj.context?.json?.();
                     if (body?.error) detail = body.error;
                 } catch { /* ignore */ }
                 throw new Error(detail);
@@ -92,7 +93,8 @@ const PricingModal: React.FC<PricingModalProps> = ({ onClose }) => {
             } else {
                 throw new Error('決済URLの取得に失敗しました');
             }
-        } catch (e: any) {
+        } catch (err) {
+            const e = err as Error;
             console.error(e);
             alert(`エラーが発生しました: ${e.message}`);
         } finally {
@@ -111,7 +113,8 @@ const PricingModal: React.FC<PricingModalProps> = ({ onClose }) => {
             if (data?.url) {
                 window.location.href = data.url;
             }
-        } catch (e: any) {
+        } catch (err) {
+            const e = err as Error;
             console.error(e);
             alert(`エラーが発生しました: ${e.message}`);
         } finally {
