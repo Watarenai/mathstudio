@@ -47,7 +47,8 @@ const Root = () => {
 
     // ランディングページ
     if (view === 'landing') {
-        if (window.location.pathname === '/tokushoho') {
+        // Stripe特商法用隠しURL（推測不可能な文字列）
+        if (window.location.pathname === '/legal-notice-x8k9m2p45q') {
             return <Suspense fallback={null}><TokushohoPage /></Suspense>;
         }
 
