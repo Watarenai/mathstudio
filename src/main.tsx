@@ -25,10 +25,12 @@ const Root = () => {
     const { view, setView } = useGameStore();
     const { user, loading, initialize } = useAuthStore();
 
-    // URL Check for Admin
+    // URL Check for Admin and specific pages
     useEffect(() => {
         if (window.location.pathname === '/admin') {
             useGameStore.setState({ view: 'admin' });
+        } else if (window.location.pathname === '/legal-notice-x8k9m2p45q') {
+            useGameStore.setState({ view: 'tokushoho' as const });
         }
     }, []);
 
@@ -47,16 +49,13 @@ const Root = () => {
 
     // ランディングページ
     if (view === 'landing') {
-        // Stripe特商法用隠しURL（推測不可能な文字列）
-        if (window.location.pathname === '/legal-notice-x8k9m2p45q') {
-            return <Suspense fallback={null}><TokushohoPage /></Suspense>;
-        }
-
         return <LandingPage
             onStart={() => {
-                // ログイン済みならアプリへ、未ログインなら必ず認証画面へ
-                // (isSupabaseConfigured は関係なく、ログイン状態のみで判断)
-                user ? setView('app') : setView('auth');
+                if (user) {
+                    setView('app');
+                } else {
+                    setView('auth');
+                }
             }}
             onLogin={() => setView('auth')}
         />;
@@ -71,6 +70,10 @@ const Root = () => {
 
     if (view === 'admin') {
         return <Suspense fallback={null}><AdminDashboard /></Suspense>;
+    }
+
+    if (view === ('tokushoho' as const)) {
+        return <Suspense fallback={null}><TokushohoPage /></Suspense>;
     }
 
     // メインアプリ

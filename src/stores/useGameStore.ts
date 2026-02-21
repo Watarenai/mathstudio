@@ -156,8 +156,8 @@ interface GameState {
     setPricingModalOpen: (open: boolean) => void;
 
     // Navigation
-    view: 'landing' | 'auth' | 'app' | 'admin';
-    setView: (view: 'landing' | 'auth' | 'app' | 'admin') => void;
+    view: 'landing' | 'auth' | 'app' | 'admin' | 'tokushoho';
+    setView: (view: 'landing' | 'auth' | 'app' | 'admin' | 'tokushoho') => void;
 
     // Actions
     setDifficulty: (d: Difficulty) => void;
