@@ -12,8 +12,9 @@ const PricingModal = lazy(() => import('./components/PricingModal'));
 const ParentDashboard = lazy(() => import('./components/ParentDashboard'));
 import { useAuthStore } from './stores/useAuthStore';
 import { isSupabaseConfigured } from './lib/supabase';
-import { Menu, BarChart3, Users } from 'lucide-react';
+import { Menu, BarChart3, Users, Settings } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
+import { UserSettingsModal } from './components/UserSettingsModal';
 
 const MathStudioV2 = () => {
   const { currentProblem, status, challengeMode, generateProblem, advanceChallenge, isPricingModalOpen, setPricingModalOpen } = useGameStore();
@@ -22,6 +23,7 @@ const MathStudioV2 = () => {
   const [rightOpen, setRightOpen] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const canAddProblems = isSupabaseConfigured && !!user;
 
   // 初回ロード
@@ -40,7 +42,7 @@ const MathStudioV2 = () => {
       }, 2000);
       return () => clearTimeout(timer);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, challengeMode]);
 
   // 決済完了時の処理
@@ -99,6 +101,27 @@ const MathStudioV2 = () => {
           </button>
         </div>
 
+        {/* Desktop top bar / Settings icon */}
+        <div className="absolute top-4 right-4 hidden lg:block z-20">
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="p-2 bg-white rounded-full shadow-sm border border-slate-100 text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+            title="アカウント設定"
+          >
+            <Settings size={20} />
+          </button>
+        </div>
+
+        {/* Mobile top bar added setting icon next to the bar chart icon for parity */}
+        <div className="flex items-center justify-between w-full max-w-2xl z-20 mb-4 lg:hidden">
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="absolute top-4 right-4 p-2.5 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-500 hover:text-slate-700 active:scale-95 transition-all"
+          >
+            <Settings size={20} />
+          </button>
+        </div>
+
         {/* 保護者ダッシュボードボタン（ファミリープランのみ表示） */}
         {isFamily && (
           <div className="w-full max-w-2xl z-20 mb-2">
@@ -148,6 +171,8 @@ const MathStudioV2 = () => {
       <Suspense fallback={null}>
         {dashboardOpen && <ParentDashboard onClose={() => setDashboardOpen(false)} />}
       </Suspense>
+
+      <UserSettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
       <ReloadPrompt />
     </div>
