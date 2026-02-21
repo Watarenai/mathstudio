@@ -55,10 +55,12 @@ serve(async (req) => {
 
         // 4. ダミーメールアドレスとパスワードの生成
         // ランダムなIDを付与してユニークにする
-        const randomId = Math.floor(Math.random() * 1000000)
+        const randomId = crypto.getRandomValues(new Uint32Array(1))[0] % 1000000
         const email = `child_${parentId.slice(0, 8)}_${randomId}@mathbudy.internal` // .internal ドメインを使用
-        const password = `pass_${Math.random().toString(36).slice(-8)}` // 簡易パスワード生成
 
+        // Web Crypto API を使用した暗号論的に安全なパスワード生成
+        const securePassword = crypto.randomUUID().replace(/-/g, '').slice(0, 12)
+        const password = `pass_${securePassword}`
         // 5. ユーザー作成 (Admin API)
         const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
             email: email,

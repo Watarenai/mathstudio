@@ -204,13 +204,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ onSkip: _onSkip }) => {
                 {import.meta.env.DEV && (
                     <div className="flex flex-col gap-2 mt-6">
                         <button
-                            onClick={() => handleDevLogin('w@gmail.com', 'nana9999')}
+                            onClick={() => handleDevLogin('w@gmail.com', import.meta.env.VITE_DEV_PASSWORD || 'password')}
                             className="text-xs bg-amber-100 text-amber-700 py-2 rounded-lg font-bold hover:bg-amber-200 transition-colors"
                         >
                             ⚡ 開発用 (w@gmail.com)
                         </button>
                         <button
-                            onClick={() => handleDevLogin('a@gmail.com', 'nananana')}
+                            onClick={() => handleDevLogin('a@gmail.com', import.meta.env.VITE_DEV_PASSWORD || 'password')}
                             className="text-xs bg-amber-100 text-amber-700 py-2 rounded-lg font-bold hover:bg-amber-200 transition-colors"
                         >
                             ⚡ 開発用 (a@gmail.com)

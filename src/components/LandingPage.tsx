@@ -315,9 +315,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                         <div className="w-6 h-6 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold text-xs">M</div>
                         <span className="font-bold text-slate-600 text-sm">MathStudio</span>
                     </div>
-                    <p className="text-slate-400 text-sm">
-                        © 2026 MathStudio. All rights reserved.
-                    </p>
+                    <div className="flex items-center gap-6 mt-4 md:mt-0">
+                        <a href="/tokushoho" className="text-slate-400 hover:text-slate-600 text-sm font-medium transition-colors">
+                            特定商取引法に基づく表記
+                        </a>
+                        <p className="text-slate-400 text-sm">
+                            © 2026 MathStudio. All rights reserved.
+                        </p>
+                    </div>
                 </div>
             </footer>
         </div>

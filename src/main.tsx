@@ -10,6 +10,7 @@ import { useGameStore } from './stores/useGameStore.ts'
 import './index.css'
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.tsx'))
+const TokushohoPage = lazy(() => import('./components/TokushohoPage.tsx'))
 
 Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,
@@ -34,7 +35,7 @@ const Root = () => {
     // Supabase セッション復元
     useEffect(() => {
         initialize();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // ログイン済みならアプリへ直行 (ただし、現在が landing/auth の場合のみ)
@@ -46,6 +47,10 @@ const Root = () => {
 
     // ランディングページ
     if (view === 'landing') {
+        if (window.location.pathname === '/tokushoho') {
+            return <Suspense fallback={null}><TokushohoPage /></Suspense>;
+        }
+
         return <LandingPage
             onStart={() => {
                 // ログイン済みならアプリへ、未ログインなら必ず認証画面へ

@@ -19,9 +19,14 @@ Deno.serve(async (req) => {
         const { priceId, planType, successUrl, cancelUrl } = await req.json()
 
         // ユーザー認証: Supabase Auth API を叩いて確認する
-        const authHeader = req.headers.get('Authorization')
+        let authHeader = req.headers.get('Authorization')
         if (!authHeader) {
             throw new Error('No Authorization header')
+        }
+
+        // ensure Bearer prefix
+        if (!authHeader.startsWith('Bearer ')) {
+            authHeader = `Bearer ${authHeader}`
         }
 
         const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
@@ -74,7 +79,8 @@ Deno.serve(async (req) => {
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error)
         console.error('Function error:', message)
-        return new Response(JSON.stringify({ error: message }), {
+        // セキュリティ対策: クライアントには詳細なエラー内容を返さない
+        return new Response(JSON.stringify({ error: '決済セッションの作成に失敗しました。時間をおいて再度お試しください。' }), {
             status: 400,
             headers: {
                 'Content-Type': 'application/json',

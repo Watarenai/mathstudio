@@ -27,9 +27,6 @@ Thumbs.db
 .env.local
 .env.production
 
-# Electron
-electron/dist
-
 # Misc
 build_log.txt
 build_errors.txt
